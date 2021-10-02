@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:layout_centerInParent="true"
+    android:background="@color/background"
+
+    tools:context=".MainActivity" >
+        <include
+
+                layout="@layout/toolbar_main"
+                android:id="@+id/toolbar"
+                />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="704dp"
+            android:layout_height="321dp"
+            android:layout_gravity="center"
+
+            android:layout_margin="20dp"
+            android:background="@drawable/shape">
+
+                <TextView
+                    android:id="@+id/initialsetup"
+                    android:layout_width="304dp"
+                    android:layout_height="46dp"
+                    android:layout_marginStart="248dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="30dp"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Initial Setup"
+                    android:textColor="@color/black"
+                    android:textSize="32sp"
+                    app:layout_constraintBottom_toTopOf="@+id/usertextview"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+
+                    android:id="@+id/gobtn"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/roundedbutton"
+                    android:padding="6dp"
+                    android:text="Go ......"
+                    android:textColor="#D7CCC8"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.823"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView"
+                    app:layout_constraintVertical_bias="0.256" />
+
+                <EditText
+
+                    android:id="@+id/editText"
+                    android:layout_width="270dp"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="4dp"
+                    android:background="#FFFAFA"
+                    android:hint="Enter the username"
+                    android:inputType="text"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.445"
+                    app:layout_constraintStart_toEndOf="@+id/usertextview"
+                    app:layout_constraintTop_toBottomOf="@+id/initialsetup" />
+
+                <TextView
+                    android:id="@+id/usertextview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="104dp"
+                    android:layout_marginTop="4dp"
+
+                    android:fontFamily="sans-serif-black"
+                    android:text="your username"
+                    android:textColor="@color/black"
+                    android:textSize="25sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/initialsetup" />
+
+                <TextView
+                    android:id="@+id/divicename"
+                    android:layout_width="177dp"
+                    android:layout_height="47dp"
+                    android:layout_marginStart="116dp"
+                    android:layout_marginTop="36dp"
+
+                    android:fontFamily="sans-serif-black"
+                    android:text="Device name"
+                    android:textColor="@color/black"
+                    android:textSize="25sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/usertextview" />
+
+                <TextView
+
+                    android:id="@+id/textView"
+                    android:layout_width="270dp"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="24dp"
+                    android:background="#FFFAFA"
+                    android:textColor="@color/black"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.419"
+                    app:layout_constraintStart_toEndOf="@+id/divicename"
+                    app:layout_constraintTop_toBottomOf="@+id/editText" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>
