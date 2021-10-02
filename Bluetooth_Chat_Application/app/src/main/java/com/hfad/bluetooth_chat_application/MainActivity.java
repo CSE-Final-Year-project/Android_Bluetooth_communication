@@ -18,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.renderscript.Sampler;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
@@ -35,21 +36,29 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+
     final BluetoothAdapter mybluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
     boolean IsbluetoothOn=false;
     boolean IsTurningOn=false;
+    int REQUEST_DISCOVERY=1;
     Set<BluetoothDevice> pairedDevices=null;
-
+    Map<String,String> NewDevices=new HashMap<String,String>();
+    Map<String,String> PairedList=new HashMap<String,String>();
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Toolbar mytoolbar=(Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(mytoolbar);
@@ -61,40 +70,6 @@ public class MainActivity extends AppCompatActivity {
         Object Inflater=this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         //if(bluetoothstatus.isChecked())
         onSwitchClicked(bluetoothstatus);
-        View main=this.findViewById(R.id.main);
-        AlertDialog.Builder build=new AlertDialog.Builder(this);
-        build.setTitle("Chose the device you want");
-        ListView devicelist=new ListView(this);
-
-       pairedDevices=GetDevices();
-        final Handler handler=new Handler(Looper.getMainLooper());
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-               ArrayList<String> DeviceArray = new ArrayList<>();
-                Dialog dialog = new Dialog(MainActivity.this);
-                if (pairedDevices != null) {
-                    for (BluetoothDevice device : pairedDevices) {
-                        String devicename = device.getName();
-                       DeviceArray.add(devicename);
-                        String deviceMacAddress = device.getAddress();
-                        Log.d("Paired Devicesmain: ", devicename + "  with address " + deviceMacAddress);
-
-                    }
-                    ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(MainActivity.this,
-                            android.R.layout.simple_list_item_1,
-                            DeviceArray);;
-                    devicelist.setAdapter(DeviceAdapter);
-                    build.setView(devicelist);
-                    dialog=build.create();
-                    dialog.show();
-
-//                    LayoutInflater inflater = (LayoutInflater)Inflater ;
-//                    PopupWindow pw = new PopupWindow(inflater.inflate(R.layout.popup_paired_devices, null, false), 100, 100, true);
-//                    pw.showAtLocation(main, Gravity.CENTER, 0, 0);
-                }
-            }
-        },20000);
 
     }
     private void SetDevices(Set<BluetoothDevice> devices){
@@ -128,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 BluetoothDevice device=intent.getParcelableExtra(BluetoothDevice.ACTION_FOUND);
                 String devicename=device.getName();
                 String deviceMacAddress=device.getAddress();
+                NewDevices.put(devicename,deviceMacAddress);
                 Log.d("discovable Devices: ",devicename+"  with address "+deviceMacAddress);
 
             }
@@ -139,36 +115,52 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(receiver);
 
     }
+    @Override
+    public void onActivityResult(int requestCode,int resultCode,Intent data) {
+
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==REQUEST_DISCOVERY){
+            turnonBlutooth();
+        }
+    }
+
 private void turnonBlutooth(){
+    IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+    registerReceiver(receiver, filter);
+    mybluetoothAdapter.startDiscovery();
     if (mybluetoothAdapter == null) {
 
         Toast.makeText(getApplicationContext(), "BLUETOOTH NOT SUPPORTED TO DIS DEVICE", Toast.LENGTH_SHORT).show();
+    return;
     }
 
     if (!mybluetoothAdapter.isEnabled()) {
 
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        startActivity(enableBtIntent);
+        startActivityForResult(enableBtIntent,REQUEST_DISCOVERY);
+
 
         //Log.d(" Is it on ?: "," "+mybluetoothAdapter.isEnabled());
     }
     if (!mybluetoothAdapter.isDiscovering()) {
         Toast.makeText(getApplicationContext(), "Making your device discoverable", Toast.LENGTH_SHORT).show();
         Intent enablediscoveIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        startActivity(enablediscoveIntent);
+        startActivityForResult(enablediscoveIntent,REQUEST_DISCOVERY);
 
     }
 
 }
     public void onSwitchClicked(View view) {
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(receiver, filter);
+
         boolean Ischecked = ((Switch) view).isChecked();
 
         Button gobtn = (Button) findViewById(R.id.gobtn);
 
         if (Ischecked) {
             turnonBlutooth();
+            Log.d("New device name",""+NewDevices.get(0));
+//         for(int i=0;i<NewDevices.size();i++)
+//            Log.d("New device name",""+NewDevices.get(i));
             final Handler handler=new Handler(Looper.getMainLooper());
             handler.postDelayed(new Runnable() {
                 @Override
@@ -177,20 +169,34 @@ private void turnonBlutooth(){
                     Set<BluetoothDevice>  pairedDevices = mybluetoothAdapter.getBondedDevices();
                     BluetoothManager manager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
                     List<BluetoothDevice> connected = manager.getConnectedDevices(GATT);
-                    Log.d("Connected Devices: ", connected.size() + " ");
 
                     Log.d("Discovering ?", " " + mybluetoothAdapter.isDiscovering());
 
 
                     if (pairedDevices!=null) {
                         SetDevices(pairedDevices);
+                        ArrayList<String> DeviceArray = new ArrayList<>();
                         //there are paired devices. get the name and addresses of each paired device
                         for (BluetoothDevice device : pairedDevices) {
                             String devicename = device.getName();
                             String deviceMacAddress = device.getAddress();
+                            PairedList.put(devicename,deviceMacAddress);
+                            DeviceArray.add(devicename);
                             Log.d("Paired Devices: ", devicename + "  with address " + deviceMacAddress);
 
                         }
+                        View main=MainActivity.this.findViewById(R.id.main);
+                        AlertDialog.Builder build=new AlertDialog.Builder(MainActivity.this);
+                        build.setTitle("Chose the device you want");
+                        ListView devicelist=new ListView(MainActivity.this);
+                        Dialog dialog = new Dialog(MainActivity.this);
+                        ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(MainActivity.this,
+                                android.R.layout.simple_list_item_1,
+                                DeviceArray);
+                        devicelist.setAdapter(DeviceAdapter);
+                        build.setView(devicelist);
+                        dialog=build.create();
+                        dialog.show();
 
 
                     }
