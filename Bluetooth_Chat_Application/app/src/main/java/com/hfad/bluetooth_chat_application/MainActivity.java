@@ -46,7 +46,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
-    final BluetoothAdapter mybluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
+    public  final BluetoothAdapter mybluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
     boolean IsbluetoothOn=false;
     boolean IsTurningOn=false;
     int REQUEST_DISCOVERY=1;
@@ -83,37 +83,12 @@ public class MainActivity extends AppCompatActivity {
 //        DeviceArray.add(element);
 //        return DeviceArray.toArray(new String[0]);
 //    }
-    private final BroadcastReceiver receiver=new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d("Resitering ","Bluetooth event listern register");
-            Toast.makeText(getApplicationContext(), "Bluetooth event listern register", Toast.LENGTH_SHORT).show();
-            String action=intent.getAction();
-            if(action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)){
-                //Discovering has found a device. get the bluetoothDevice object and its info its info from the intent
-                int state=intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,BluetoothAdapter.ERROR);
-                switch (state){
-                    case BluetoothAdapter.STATE_ON:
-                        IsTurningOn=true;
-                        Toast.makeText(getApplicationContext(), "Bluetooth is turned on...", Toast.LENGTH_SHORT).show();
 
-                        break;
-
-                }
-                BluetoothDevice device=intent.getParcelableExtra(BluetoothDevice.ACTION_FOUND);
-                String devicename=device.getName();
-                String deviceMacAddress=device.getAddress();
-                NewDevices.put(devicename,deviceMacAddress);
-                Log.d("discovable Devices: ",devicename+"  with address "+deviceMacAddress);
-
-            }
-        }
-    };
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(receiver);
-
+        //unregisterReceiver(receiver);
+        //mybluetoothAdapter.disable();
     }
     @Override
     public void onActivityResult(int requestCode,int resultCode,Intent data) {
@@ -124,9 +99,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-private void turnonBlutooth(){
-    IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-    registerReceiver(receiver, filter);
+public  void turnonBlutooth(){
+//    IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+//    registerReceiver(receiver, filter);
     mybluetoothAdapter.startDiscovery();
     if (mybluetoothAdapter == null) {
 
@@ -138,7 +113,6 @@ private void turnonBlutooth(){
 
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent,REQUEST_DISCOVERY);
-
 
         //Log.d(" Is it on ?: "," "+mybluetoothAdapter.isEnabled());
     }
@@ -175,34 +149,33 @@ private void turnonBlutooth(){
 
                     if (pairedDevices!=null) {
                         SetDevices(pairedDevices);
-                        ArrayList<String> DeviceArray = new ArrayList<>();
+                        ArrayList<BluetoothDevice> DeviceArray = new ArrayList<>();
+
                         //there are paired devices. get the name and addresses of each paired device
                         for (BluetoothDevice device : pairedDevices) {
                             String devicename = device.getName();
                             String deviceMacAddress = device.getAddress();
                             PairedList.put(devicename,deviceMacAddress);
-                            DeviceArray.add(devicename);
+                            DeviceArray.add(device);
                             Log.d("Paired Devices: ", devicename + "  with address " + deviceMacAddress);
 
                         }
-                        View main=MainActivity.this.findViewById(R.id.main);
-                        AlertDialog.Builder build=new AlertDialog.Builder(MainActivity.this);
-                        build.setTitle("Chose the device you want");
-                        ListView devicelist=new ListView(MainActivity.this);
-                        Dialog dialog = new Dialog(MainActivity.this);
-                        ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(MainActivity.this,
-                                android.R.layout.simple_list_item_1,
-                                DeviceArray);
-                        devicelist.setAdapter(DeviceAdapter);
-                        build.setView(devicelist);
-                        dialog=build.create();
-                        dialog.show();
 
+                        gobtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Log.d("Devices are ",""+pairedDevices);
+                                Intent DashboardIntent=new Intent(MainActivity.this,Dashboard.class);
+                                DashboardIntent.putExtra("PairedDevices",DeviceArray);
+                                startActivity(DashboardIntent);
+
+                            }
+                        });
 
                     }
                     gobtn.setEnabled(true);
                 }
-            },10000);
+            },15000);
 
         } else {
             gobtn.setEnabled(false);
@@ -211,6 +184,7 @@ private void turnonBlutooth(){
         }
 
     }
+
 
 
     @Override
