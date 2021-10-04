@@ -67,10 +67,9 @@ public class MainActivity extends AppCompatActivity {
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         Initialsetup.setText(content);
         Switch bluetoothstatus=(Switch) findViewById(R.id.bluetooth_enable);
-        Object Inflater=this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        //Object Inflater=this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         //if(bluetoothstatus.isChecked())
         onSwitchClicked(bluetoothstatus);
-
     }
     private void SetDevices(Set<BluetoothDevice> devices){
         pairedDevices=devices;
@@ -87,8 +86,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mybluetoothAdapter.disable();
+        Log.d("Bluetooth is ",""+mybluetoothAdapter.isEnabled());
         //unregisterReceiver(receiver);
-        //mybluetoothAdapter.disable();
+       // mybluetoothAdapter.disable();
+//        Switch bluetoothstatus=(Switch) findViewById(R.id.bluetooth_enable);
+//        bluetoothstatus.setEnabled(false);
+
     }
     @Override
     public void onActivityResult(int requestCode,int resultCode,Intent data) {
@@ -104,7 +108,6 @@ public  void turnonBlutooth(){
 //    registerReceiver(receiver, filter);
     mybluetoothAdapter.startDiscovery();
     if (mybluetoothAdapter == null) {
-
         Toast.makeText(getApplicationContext(), "BLUETOOTH NOT SUPPORTED TO DIS DEVICE", Toast.LENGTH_SHORT).show();
     return;
     }
@@ -112,14 +115,15 @@ public  void turnonBlutooth(){
     if (!mybluetoothAdapter.isEnabled()) {
 
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        startActivityForResult(enableBtIntent,REQUEST_DISCOVERY);
+        startActivity(enableBtIntent);
 
-        //Log.d(" Is it on ?: "," "+mybluetoothAdapter.isEnabled());
+            //Log.d(" Is it on ?: "," "+mybluetoothAdapter.isEnabled());
     }
     if (!mybluetoothAdapter.isDiscovering()) {
         Toast.makeText(getApplicationContext(), "Making your device discoverable", Toast.LENGTH_SHORT).show();
         Intent enablediscoveIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        startActivityForResult(enablediscoveIntent,REQUEST_DISCOVERY);
+        startActivity(enablediscoveIntent);
+        //openDialog();
 
     }
 
@@ -132,19 +136,37 @@ public  void turnonBlutooth(){
 
         if (Ischecked) {
             turnonBlutooth();
+             TextView devicename=(TextView)findViewById(R.id.devname);
+             devicename.setText(mybluetoothAdapter.getName());
             Log.d("New device name",""+NewDevices.get(0));
 //         for(int i=0;i<NewDevices.size();i++)
 //            Log.d("New device name",""+NewDevices.get(i));
             final Handler handler=new Handler(Looper.getMainLooper());
+
             handler.postDelayed(new Runnable() {
+
                 @Override
                 public void run() {
+//                    final Dialog dialog = new Dialog(MainActivity.this); // Context, this, etc.
+//                    dialog.setContentView(R.layout.dialog_demo);
+//                    dialog.setTitle(R.string.dialog_title);
+//                    if(gobtn==null) {
+//                        dialog.show();
+//                    }
+//                        else{
+//                            dialog.cancel();
+//
+//                        }
+
+
                     Log.d("My bluetooth name  : ", mybluetoothAdapter.getName() + "  with address " + mybluetoothAdapter.getAddress());
                     Set<BluetoothDevice>  pairedDevices = mybluetoothAdapter.getBondedDevices();
+
                     BluetoothManager manager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
                     List<BluetoothDevice> connected = manager.getConnectedDevices(GATT);
 
-                    Log.d("Discovering ?", " " + mybluetoothAdapter.isDiscovering());
+                    //Log.d("Discovering ?", " " + mybluetoothAdapter.isDiscovering());
+
 
 
                     if (pairedDevices!=null) {
@@ -175,7 +197,7 @@ public  void turnonBlutooth(){
                     }
                     gobtn.setEnabled(true);
                 }
-            },15000);
+            },12000);
 
         } else {
             gobtn.setEnabled(false);
@@ -184,6 +206,9 @@ public  void turnonBlutooth(){
         }
 
     }
+//    public void openDialog() {
+//
+//    }
 
 
 

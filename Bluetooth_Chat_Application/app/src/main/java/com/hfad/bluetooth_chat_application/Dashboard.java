@@ -61,7 +61,7 @@ public class Dashboard extends AppCompatActivity {
         ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1,
                 DeviceArray);
-        Switch mySwitch=(Switch) findViewById(R.id.bluetooth_enable);
+        Switch mySwitch=(Switch) findViewById(R.id.bluetooth_enabling);
         devicelist.setAdapter(DeviceAdapter);
         onSwitchClicked(mySwitch);
     }
@@ -109,6 +109,7 @@ public class Dashboard extends AppCompatActivity {
     }
 
     public void onSwitchClicked(View view) {
+       // Switch oldswitch=(Switch) findViewById(R.id.bluetooth_enable);
         boolean Ischecked = ((Switch) view).isChecked();
         if (Ischecked) {
             turnonBlutooth();
@@ -116,6 +117,7 @@ public class Dashboard extends AppCompatActivity {
         }
         else
         {
+           // oldswitch.setEnabled(false);
             mybluetoothAdapter.disable();
             Toast.makeText(getApplicationContext(), "TURNING_OFF BLUETOOTH!!", Toast.LENGTH_SHORT).show();
 
