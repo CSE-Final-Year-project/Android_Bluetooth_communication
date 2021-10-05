@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/call_icon.xml" value="0.18645833333333334" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/drawable_message_icon.xml" value="0.18645833333333334" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/shape.xml" value="0.1765625" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout-land/activity_main.xml" value="0.22" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout-land/toolbar_main.xml" value="0.16534391534391535" />
@@ -12,12 +14,13 @@
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/dialog_demo.xml" value="0.1953125" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/popup_paired_devices.xml" value="0.1046875" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/toolbar_main.xml" value="0.1953125" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/userslist.xml" value="0.1953125" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/menu/activity_main.xml" value="0.16041666666666668" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/menu/menu_main.xml" value="0.16041666666666668" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

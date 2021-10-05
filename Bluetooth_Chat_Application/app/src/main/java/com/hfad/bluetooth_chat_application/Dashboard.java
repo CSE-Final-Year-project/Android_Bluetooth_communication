@@ -1,6 +1,8 @@
 package com.hfad.bluetooth_chat_application;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -12,12 +14,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import org.json.JSONArray;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,62 +34,79 @@ import java.util.zip.Inflater;
 
 public class Dashboard extends AppCompatActivity {
     private static final int REQUEST_DISCOVERY = 1;
-    Map<String,String> PairedList=new HashMap<String,String>();
-    public  final BluetoothAdapter mybluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
-    Map<String,String> NewDevices=new HashMap<String,String>();
+    Map<String, String> PairedList = new HashMap<String, String>();
+    final BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//    private LayoutInflater layoutInflater;
+//    private Context context;
+    Map<String, String> NewDevices = new HashMap<String, String>();
+    ArrayList<String> DeviceArray = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        turnonBlutooth();
         setContentView(R.layout.activity_dashboard);
-        ListView devicelist=(ListView) findViewById(R.id.paireddevlist);
-        ToggleButton Scan=(ToggleButton) findViewById(R.id.scan);
+        ListView devicelist = (ListView) findViewById(R.id.paireddevlist);
+        ToggleButton Scan = (ToggleButton) findViewById(R.id.scan);
 //        LayoutInflater inflater=getLayoutInflater();
 //        View myview=inflater.inflate(R.layout.activity_dashboard,null);
         Scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                IntentFilter filter=new IntentFilter(BluetoothDevice.ACTION_FOUND);
-                registerReceiver(receiver,filter);
+                IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+                registerReceiver(receiver, filter);
                 mybluetoothAdapter.startDiscovery();
             }
         });
-        ArrayList<BluetoothDevice> pairedDevices=(ArrayList<BluetoothDevice>) getIntent().getExtras().get("PairedDevices");
-        ArrayList<String> DeviceArray = new ArrayList<>();
+        ArrayList<User>  arrayOfUsers=new ArrayList<User>();
+        UsersAdapter adapter=new UsersAdapter(this,arrayOfUsers);
+        devicelist.setAdapter(adapter);
+        ArrayList<BluetoothDevice> pairedDevices = (ArrayList<BluetoothDevice>) getIntent().getExtras().get("PairedDevices");
+
         //there are paired devices. get the name and addresses of each paired device
         for (BluetoothDevice device : pairedDevices) {
             String devicename = device.getName();
             String deviceMacAddress = device.getAddress();
-            PairedList.put(devicename,deviceMacAddress);
+            PairedList.put(devicename, deviceMacAddress);
             DeviceArray.add(devicename);
+            User newUser=new User(devicename,deviceMacAddress);
+            adapter.add(newUser);
             Log.d("Paired Devices: ", devicename + "  with address " + deviceMacAddress);
 
         }
+        devicelist.setAdapter(adapter);
+
+
+
+
+
+
         ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1,
                 DeviceArray);
-        Switch mySwitch=(Switch) findViewById(R.id.bluetooth_enabling);
-        devicelist.setAdapter(DeviceAdapter);
+        Switch mySwitch = (Switch) findViewById(R.id.bluetooth_enabling);
+        //devicelist.setAdapter(DeviceAdapter);
         onSwitchClicked(mySwitch);
     }
-    private final BroadcastReceiver receiver=new BroadcastReceiver() {
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("Resitering ","Bluetooth event listern register");
+            Log.d("Resitering ", "Bluetooth event listern register");
             Toast.makeText(getApplicationContext(), "Bluetooth event listern register", Toast.LENGTH_SHORT).show();
-            String action=intent.getAction();
-            if(BluetoothDevice.ACTION_FOUND.equals(action)){
+            String action = intent.getAction();
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 //Discovering has found a device. get the bluetoothDevice object and its info its info from the intent
-                BluetoothDevice device=intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String devicename=device.getName();
-                String deviceMacAddress=device.getAddress();
-                NewDevices.put(devicename,deviceMacAddress);
-                Log.d("discovable Devices: ",devicename+"  with address "+deviceMacAddress);
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                String devicename = device.getName();
+                String deviceMacAddress = device.getAddress();
+                NewDevices.put(devicename, deviceMacAddress);
+                Log.d("discovable Devices: ", devicename + "  with address " + deviceMacAddress);
 
             }
         }
     };
-    public  void turnonBlutooth(){
+
+    public void turnonBlutooth() {
 //    IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
 //    registerReceiver(receiver, filter);
         mybluetoothAdapter.startDiscovery();
@@ -95,33 +119,33 @@ public class Dashboard extends AppCompatActivity {
         if (!mybluetoothAdapter.isEnabled()) {
 
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent,REQUEST_DISCOVERY);
+            startActivityForResult(enableBtIntent, REQUEST_DISCOVERY);
 
             //Log.d(" Is it on ?: "," "+mybluetoothAdapter.isEnabled());
         }
         if (!mybluetoothAdapter.isDiscovering()) {
             Toast.makeText(getApplicationContext(), "Making your device discoverable", Toast.LENGTH_SHORT).show();
             Intent enablediscoveIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            startActivityForResult(enablediscoveIntent,REQUEST_DISCOVERY);
+            startActivityForResult(enablediscoveIntent, REQUEST_DISCOVERY);
 
         }
 
     }
 
     public void onSwitchClicked(View view) {
-       // Switch oldswitch=(Switch) findViewById(R.id.bluetooth_enable);
+        // Switch oldswitch=(Switch) findViewById(R.id.bluetooth_enable);
         boolean Ischecked = ((Switch) view).isChecked();
         if (Ischecked) {
             turnonBlutooth();
 
-        }
-        else
-        {
-           // oldswitch.setEnabled(false);
+        } else {
+            // oldswitch.setEnabled(false);
             mybluetoothAdapter.disable();
             Toast.makeText(getApplicationContext(), "TURNING_OFF BLUETOOTH!!", Toast.LENGTH_SHORT).show();
 
         }
 
     }
+
+
 }
