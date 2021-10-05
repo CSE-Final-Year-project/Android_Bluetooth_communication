@@ -57,9 +57,10 @@ public class Dashboard extends AppCompatActivity {
                 mybluetoothAdapter.startDiscovery();
             }
         });
+        User user;
         ArrayList<User>  arrayOfUsers=new ArrayList<User>();
-        UsersAdapter adapter=new UsersAdapter(this,arrayOfUsers);
-        devicelist.setAdapter(adapter);
+
+//        devicelist.setAdapter(adapter);
         ArrayList<BluetoothDevice> pairedDevices = (ArrayList<BluetoothDevice>) getIntent().getExtras().get("PairedDevices");
 
         //there are paired devices. get the name and addresses of each paired device
@@ -68,24 +69,39 @@ public class Dashboard extends AppCompatActivity {
             String deviceMacAddress = device.getAddress();
             PairedList.put(devicename, deviceMacAddress);
             DeviceArray.add(devicename);
-            User newUser=new User(devicename,deviceMacAddress);
-            adapter.add(newUser);
-            Log.d("Paired Devices: ", devicename + "  with address " + deviceMacAddress);
+            user=new User(devicename,deviceMacAddress);
+            arrayOfUsers.add(user);
+           // Log.d("Paired Devices: ", newUser.username );
 
         }
+
+        UsersAdapter adapter=new UsersAdapter(this,arrayOfUsers);
+         for(int i=0;i<arrayOfUsers.size();i++)
+        Log.d("device: "+i, " "+adapter.getItem(i));
         devicelist.setAdapter(adapter);
-
-
-
-
-
 
         ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1,
                 DeviceArray);
         Switch mySwitch = (Switch) findViewById(R.id.bluetooth_enabling);
         //devicelist.setAdapter(DeviceAdapter);
-        onSwitchClicked(mySwitch);
+        mySwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean Ischecked = mySwitch.isChecked();
+                if (Ischecked) {
+                    turnonBlutooth();
+
+                } else {
+                    // oldswitch.setEnabled(false);
+                    mybluetoothAdapter.disable();
+                    Toast.makeText(getApplicationContext(), "TURNING_OFF BLUETOOTH!!", Toast.LENGTH_SHORT).show();
+
+                }
+
+            }
+        });
+        //onSwitchClicked(mySwitch);
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -132,20 +148,20 @@ public class Dashboard extends AppCompatActivity {
 
     }
 
-    public void onSwitchClicked(View view) {
-        // Switch oldswitch=(Switch) findViewById(R.id.bluetooth_enable);
-        boolean Ischecked = ((Switch) view).isChecked();
-        if (Ischecked) {
-            turnonBlutooth();
-
-        } else {
-            // oldswitch.setEnabled(false);
-            mybluetoothAdapter.disable();
-            Toast.makeText(getApplicationContext(), "TURNING_OFF BLUETOOTH!!", Toast.LENGTH_SHORT).show();
-
-        }
-
-    }
+//    public void onSwitchClicked(View view) {
+//        // Switch oldswitch=(Switch) findViewById(R.id.bluetooth_enable);
+//        boolean Ischecked = ((Switch) view).isChecked();
+//        if (Ischecked) {
+//            turnonBlutooth();
+//
+//        } else {
+//            // oldswitch.setEnabled(false);
+//            mybluetoothAdapter.disable();
+//            Toast.makeText(getApplicationContext(), "TURNING_OFF BLUETOOTH!!", Toast.LENGTH_SHORT).show();
+//
+//        }
+//
+//    }
 
 
 }

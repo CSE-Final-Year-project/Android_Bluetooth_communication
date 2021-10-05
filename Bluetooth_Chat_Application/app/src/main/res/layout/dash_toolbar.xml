@@ -18,7 +18,6 @@
         android:layout_marginRight="10dp"
         android:background="@color/bluetoothbutton"
         android:minHeight="48dp"
-        android:onClick="onSwitchClicked"
         android:paddingLeft="10dp"
         android:showText="true"
         android:switchMinWidth="70dp"

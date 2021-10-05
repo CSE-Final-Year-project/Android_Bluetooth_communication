@@ -179,7 +179,7 @@ public  void turnonBlutooth(){
                             String deviceMacAddress = device.getAddress();
                             PairedList.put(devicename,deviceMacAddress);
                             DeviceArray.add(device);
-                            Log.d("Paired Devices: ", devicename + "  with address " + deviceMacAddress);
+                            //Log.d("Paired Devices: ", devicename + "  with address " + deviceMacAddress);
 
                         }
 
