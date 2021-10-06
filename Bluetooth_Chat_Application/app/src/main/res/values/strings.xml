@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Easy_Chat</string>
     <string name="dialog_text">Loading paired devices</string>
-    <string name="dialog_title">Waiting.........</string>
+    <string name="dialog_title">Discovering.........</string>
 </resources>

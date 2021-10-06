@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomAlertDialog">
+        <item name="alertDialogTheme">@style/CustomAlertDialogtheme</item>
+    </style>
+    <style name="CustomAlertDialogtheme">
+        <item name="textColorAlertDialogListItem">@color/some_color</item>
+    </style>
+</resources>

@@ -2,9 +2,16 @@ package com.hfad.bluetooth_chat_application;
 
 import static android.bluetooth.BluetoothProfile.GATT;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
@@ -35,6 +42,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 
 import java.security.Key;
 import java.util.ArrayList;
@@ -46,6 +54,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int REQUEST_ENABLE = 1;
     public  final BluetoothAdapter mybluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
     boolean IsbluetoothOn=false;
     boolean IsTurningOn=false;
@@ -53,11 +62,25 @@ public class MainActivity extends AppCompatActivity {
     Set<BluetoothDevice> pairedDevices=null;
     Map<String,String> NewDevices=new HashMap<String,String>();
     Map<String,String> PairedList=new HashMap<String,String>();
+    ActivityResultLauncher<Intent> activityResultLauncher=registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if(result.getResultCode()== Activity.RESULT_OK){
+                        Intent data=result.getData();
+                        turnonBlutooth();
+                    }
+                }
+            }
+
+    );
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
 
         setContentView(R.layout.activity_main);
         Toolbar mytoolbar=(Toolbar)findViewById(R.id.toolbar);
@@ -69,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
         Switch bluetoothstatus=(Switch) findViewById(R.id.bluetooth_enable);
         //Object Inflater=this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         //if(bluetoothstatus.isChecked())
+        int MY_PERMISSIOMS_REQUEST_ACCESS_BLUETOOTH=1;
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.BLUETOOTH,Manifest.permission.BLUETOOTH_ADMIN,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},MY_PERMISSIOMS_REQUEST_ACCESS_BLUETOOTH);
+
         onSwitchClicked(bluetoothstatus);
     }
     private void SetDevices(Set<BluetoothDevice> devices){
@@ -94,14 +120,7 @@ public class MainActivity extends AppCompatActivity {
 //        bluetoothstatus.setEnabled(false);
 
     }
-    @Override
-    public void onActivityResult(int requestCode,int resultCode,Intent data) {
 
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==REQUEST_DISCOVERY){
-            turnonBlutooth();
-        }
-    }
 
 public  void turnonBlutooth(){
 //    IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -115,17 +134,17 @@ public  void turnonBlutooth(){
     if (!mybluetoothAdapter.isEnabled()) {
 
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        startActivity(enableBtIntent);
+        activityResultLauncher.launch(enableBtIntent);
 
             //Log.d(" Is it on ?: "," "+mybluetoothAdapter.isEnabled());
     }
-    if (!mybluetoothAdapter.isDiscovering()) {
-        Toast.makeText(getApplicationContext(), "Making your device discoverable", Toast.LENGTH_SHORT).show();
-        Intent enablediscoveIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        startActivity(enablediscoveIntent);
-        //openDialog();
-
-    }
+//    if (!mybluetoothAdapter.isDiscovering()) {
+//        Toast.makeText(getApplicationContext(), "Making your device discoverable", Toast.LENGTH_SHORT).show();
+//        Intent enablediscoveIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+//        startActivity(enablediscoveIntent);
+//        //openDialog();
+//
+//    }
 
 }
     public void onSwitchClicked(View view) {
@@ -147,16 +166,7 @@ public  void turnonBlutooth(){
 
                 @Override
                 public void run() {
-//                    final Dialog dialog = new Dialog(MainActivity.this); // Context, this, etc.
-//                    dialog.setContentView(R.layout.dialog_demo);
-//                    dialog.setTitle(R.string.dialog_title);
-//                    if(gobtn==null) {
-//                        dialog.show();
-//                    }
-//                        else{
-//                            dialog.cancel();
-//
-//                        }
+
 
 
                     Log.d("My bluetooth name  : ", mybluetoothAdapter.getName() + "  with address " + mybluetoothAdapter.getAddress());
@@ -197,7 +207,7 @@ public  void turnonBlutooth(){
                     }
                     gobtn.setEnabled(true);
                 }
-            },12000);
+            },5000);
 
         } else {
             gobtn.setEnabled(false);
@@ -206,9 +216,7 @@ public  void turnonBlutooth(){
         }
 
     }
-//    public void openDialog() {
-//
-//    }
+
 
 
 
