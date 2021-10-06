@@ -242,13 +242,7 @@ public class Dashboard extends AppCompatActivity {
 //                Log.d("chosen: ", finalDevices[which]);
 //            }
 //        });
-        builder.setPositiveButton("connect", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // user clicked OK
-              //  Toast.makeText(getApplicationContext(), ""+which+"Is selected", Toast.LENGTH_SHORT).show();
-            }
-        });
+
         builder.setNegativeButton("Cancel", null);
 
 // create and show the alert dialog
