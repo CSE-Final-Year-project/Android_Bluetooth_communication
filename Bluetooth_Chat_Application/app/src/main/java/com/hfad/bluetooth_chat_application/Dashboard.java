@@ -193,8 +193,8 @@ public class Dashboard extends AppCompatActivity {
     public void showList(){
 
 
-    newdevicesname.add("New device....");
-       newdevicesname.add("second device....");
+//    newdevicesname.add("New device....");
+//       newdevicesname.add("second device....");
         //final ArrayAdapter<String> arrayAdapter=new ArrayAdapter<String>(Dashboard.this, android.R.layout.select_dialog_singlechoice);
 
         //if (NewDevices != null)
