@@ -273,8 +273,6 @@ public class Dashboard extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(NewDevices!=null)
-        unregisterReceiver(receiver);
     }
 
     public void turnonBlutooth() {
