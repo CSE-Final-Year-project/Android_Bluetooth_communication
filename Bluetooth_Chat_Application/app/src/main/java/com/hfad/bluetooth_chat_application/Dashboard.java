@@ -39,6 +39,7 @@ import android.widget.ToggleButton;
 import org.json.JSONArray;
 import org.w3c.dom.Text;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,10 +52,13 @@ public class Dashboard extends AppCompatActivity {
     private static final int REQUEST_ENABLE =1 ;
     Map<String, String> PairedList = new HashMap<String, String>();
     BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    
+    ToggleButton Scan;
    ArrayList< BluetoothDevice> NewDevices = new ArrayList<>();
     ArrayList<String> newdevicesname = new ArrayList<>();
     ArrayList<String> DeviceArray = new ArrayList<>();
+    UsersAdapter adapter;
+    ArrayList<BluetoothDevice> pairedDevices;
+    Map<String,BluetoothDevice> Device_to_pair=new HashMap<String,BluetoothDevice>();
     ListView DeviceArrayListview=null;
     ActivityResultLauncher<Intent> activityResultLauncher=registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
@@ -70,6 +74,7 @@ public class Dashboard extends AppCompatActivity {
             }
 
     );
+    // Broadcast to notify if the there is a new device around
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -83,6 +88,7 @@ public class Dashboard extends AppCompatActivity {
                 String devicename = device.getName();
                 String deviceMacAddress = device.getAddress();
                 NewDevices.add(device);
+                Device_to_pair.put(devicename,device);
                  if(!newdevicesname.contains(devicename)){
                      newdevicesname.add(devicename);
 
@@ -108,7 +114,7 @@ public class Dashboard extends AppCompatActivity {
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.BLUETOOTH,Manifest.permission.BLUETOOTH_ADMIN},MY_PERMISSIOMS_REQUEST_ACCESS_COARSE_LOCATION);
         ListView devicelist = (ListView) findViewById(R.id.paireddevlist);
 
-        ToggleButton Scan = (ToggleButton) findViewById(R.id.scan);
+         Scan = (ToggleButton) findViewById(R.id.scan);
 
         Scan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,7 +148,7 @@ public class Dashboard extends AppCompatActivity {
         ArrayList<User>  arrayOfUsers=new ArrayList<User>();
 
 //        devicelist.setAdapter(adapter);
-        ArrayList<BluetoothDevice> pairedDevices = (ArrayList<BluetoothDevice>) getIntent().getExtras().get("PairedDevices");
+         pairedDevices = (ArrayList<BluetoothDevice>) getIntent().getExtras().get("PairedDevices");
 
         //there are paired devices. get the name and addresses of each paired device
         for (BluetoothDevice device : pairedDevices) {
@@ -156,7 +162,7 @@ public class Dashboard extends AppCompatActivity {
 
         }
 
-        UsersAdapter adapter=new UsersAdapter(this,arrayOfUsers);
+        adapter=new UsersAdapter(this,arrayOfUsers);
          for(int i=0;i<arrayOfUsers.size();i++)
         Log.d("device: "+i, " "+adapter.getItem(i));
         devicelist.setAdapter(adapter);
@@ -185,24 +191,9 @@ public class Dashboard extends AppCompatActivity {
 
     }
 
-
+//Function that Displays the list of the paired devices
     public void showList(){
 
-
-//    newdevicesname.add("New device....");
-//       newdevicesname.add("second device....");
-        //final ArrayAdapter<String> arrayAdapter=new ArrayAdapter<String>(Dashboard.this, android.R.layout.select_dialog_singlechoice);
-
-        //if (NewDevices != null)
-            for (BluetoothDevice device : NewDevices) {
-                Log.d("new device:  ", device.getName());
-                if(!newdevicesname.contains(device.getName()))
-                newdevicesname.add(device.getName());
-                //arrayAdapter.add(device.getName());
-            }
-
-        String[]  devices= new String[newdevicesname.size()];
-        devices=newdevicesname.toArray(devices);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
         ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(this,
@@ -225,21 +216,35 @@ public class Dashboard extends AppCompatActivity {
                 confirmprompt.setNegativeButton("cancel",null);
                 confirmprompt.setPositiveButton("connect", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(DialogInterface d, int which) {
+                        PairDevices(Device_to_pair.get(chosendevice));
+                        Log.d("Device is",""+Device_to_pair.get(chosendevice));
+                        pairedDevices.add(Device_to_pair.get(chosendevice));
+                        adapter.notifyDataSetChanged();
                         Toast.makeText(getApplicationContext(), "connecting "+chosendevice, Toast.LENGTH_SHORT).show();
+                        Scan.setChecked(false);
+                        d.dismiss();
+                        dialog.dismiss();
+                        Handler Handlechange=new Handler();
+                        Handlechange.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                adapter.notifyDataSetChanged();
+                            }
+                        },5000);
+
+
                     }
                 });
                 confirmprompt.create().show();
             }
         });
-//        builder.setAdapter(DeviceAdapter, new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                Log.d("chosen: ", finalDevices[which]);
-//            }
-//        });
-
-        builder.setNegativeButton("Cancel", null);
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Scan.setChecked(false);
+            }
+        });
 
 // create and show the alert dialog
         AlertDialog dialog = builder.create();
@@ -264,7 +269,7 @@ public class Dashboard extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
     }
-
+//Function that lets your bbluetooth get turned on
     public void turnonBlutooth() {
 //    IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
 //    registerReceiver(receiver, filter);
@@ -285,6 +290,7 @@ public class Dashboard extends AppCompatActivity {
 
 
     }
+    //Function that makes your device to be discovered
     public void discoveron(){
         if (!mybluetoothAdapter.isDiscovering()) {
             Toast.makeText(getApplicationContext(), "Making your device discoverable", Toast.LENGTH_SHORT).show();
@@ -294,6 +300,25 @@ public class Dashboard extends AppCompatActivity {
 
         }
     }
+    //Function that make pair
+    private Boolean PairDevices(BluetoothDevice bdDevice) {
+        Boolean bool = false;
+        try {
+            Log.i("Log", "service method is called ");
+            Class cl = Class.forName("android.bluetooth.BluetoothDevice");
+            Class[] par = {};
+            Method method = cl.getMethod("createBond", par);
+            Object[] args = {};
+            bool = (Boolean) method.invoke(bdDevice);//, args);// this invoke creates the detected devices paired.
+            //Log.i("Log", "This is: "+bool.booleanValue());
+            //Log.i("Log", "devicesss: "+bdDevice.getName());
+        } catch (Exception e) {
+            Log.i("Log", "Inside catch of serviceFromDevice Method");
+            e.printStackTrace();
+        }
+        return bool.booleanValue();
+    };
+
 
 
 
