@@ -51,9 +51,7 @@ public class Dashboard extends AppCompatActivity {
     private static final int REQUEST_ENABLE =1 ;
     Map<String, String> PairedList = new HashMap<String, String>();
     BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-//    private LayoutInflater layoutInflater;
-//    private Context context;
+    
    ArrayList< BluetoothDevice> NewDevices = new ArrayList<>();
     ArrayList<String> newdevicesname = new ArrayList<>();
     ArrayList<String> DeviceArray = new ArrayList<>();
@@ -72,8 +70,6 @@ public class Dashboard extends AppCompatActivity {
             }
 
     );
-
-
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
