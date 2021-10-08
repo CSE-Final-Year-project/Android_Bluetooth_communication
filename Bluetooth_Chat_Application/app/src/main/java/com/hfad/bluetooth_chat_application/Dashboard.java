@@ -55,8 +55,11 @@ public class Dashboard extends AppCompatActivity {
     ToggleButton Scan;
    ArrayList< BluetoothDevice> NewDevices = new ArrayList<>();
     ArrayList<String> newdevicesname = new ArrayList<>();
+
     ArrayList<String> DeviceArray = new ArrayList<>();
     ListView devicelist;
+    String devicename;
+    ArrayAdapter newadapter;
 
     ArrayList<BluetoothDevice> pairedDevices;
     Map<String,BluetoothDevice> Device_to_pair=new HashMap<String,BluetoothDevice>();
@@ -92,8 +95,7 @@ public class Dashboard extends AppCompatActivity {
                 Device_to_pair.put(devicename,device);
                  if(!newdevicesname.contains(devicename)){
                      newdevicesname.add(devicename);
-
-
+                     newadapter.notifyDataSetChanged();
                  }
 
                // ((BaseAdapter)DeviceArrayListview.getAdapter()).notifyDataSetChanged();
@@ -108,6 +110,7 @@ public class Dashboard extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
         mybluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
+        devicename=mybluetoothAdapter.getName();
         if(NewDevices!=null){
             NewDevices.clear();
         }
@@ -194,9 +197,9 @@ public class Dashboard extends AppCompatActivity {
 
 //Function that Displays the list of the paired devices
     public void showList(){
-
+if(!newdevicesname.contains(devicename))
+       newdevicesname.add(devicename);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
         ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1,
                 newdevicesname);
@@ -253,16 +256,18 @@ public class Dashboard extends AppCompatActivity {
         dialog.show();
 
         //newdevicesname.add("My device");
+
         ListView listView=dialog.getListView();
-        ArrayAdapter adapter=(ArrayAdapter) listView.getAdapter();
-        Handler Handlechange=new Handler();
-        Handlechange.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                adapter.notifyDataSetChanged();
-            }
-        },5000);
-       //1adapter.notifyDataSetChanged();
+        listView.requestLayout();
+        newadapter=(ArrayAdapter) listView.getAdapter();
+//        Handler Handlechange=new Handler();
+//        Handlechange.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                newadapter.notifyDataSetChanged();
+//            }
+//        },5000);
+//       //1adapter.notifyDataSetChanged();
 
     }
 
