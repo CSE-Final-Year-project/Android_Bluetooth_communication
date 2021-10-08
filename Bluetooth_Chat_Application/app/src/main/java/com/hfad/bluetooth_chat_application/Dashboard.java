@@ -198,7 +198,7 @@ public class Dashboard extends AppCompatActivity {
 //Function that Displays the list of the paired devices
     public void showList(){
 if(!newdevicesname.contains(devicename))
-       newdevicesname.add(devicename);
+       newdevicesname.add("Your device name :"+devicename);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1,
@@ -215,34 +215,43 @@ if(!newdevicesname.contains(devicename))
             public void onClick(DialogInterface dialog, int which) {
                 final String chosendevice=newdevicesname.get(which);
                 Log.d("chosen: ", chosendevice);
+
                 AlertDialog.Builder confirmprompt=new AlertDialog.Builder(Dashboard.this);
                 confirmprompt.setTitle("you are about to connect "+chosendevice);
                 confirmprompt.setNegativeButton("cancel",null);
                 confirmprompt.setPositiveButton("connect", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface d, int which) {
-                        PairDevices(Device_to_pair.get(chosendevice));
-                        Log.d("Device is",""+Device_to_pair.get(chosendevice));
-                        pairedDevices.add(Device_to_pair.get(chosendevice));
-                        UsersAdapter adapter=(UsersAdapter) devicelist.getAdapter();
-                        adapter.notifyDataSetChanged();
-                        Toast.makeText(getApplicationContext(), "connecting "+chosendevice, Toast.LENGTH_SHORT).show();
-                        Scan.setChecked(false);
-                        d.dismiss();
-                        dialog.dismiss();
-                        Handler Handlechange=new Handler();
-                        Handlechange.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                adapter.notifyDataSetChanged();
-                            }
-                        },5000);
+                        if(chosendevice.equals(devicename)) {
+                            PairDevices(Device_to_pair.get(chosendevice));
 
+                            Log.d("Device is", "" + Device_to_pair.get(chosendevice));
+                            pairedDevices.add(Device_to_pair.get(chosendevice));
+                            UsersAdapter adapter = (UsersAdapter) devicelist.getAdapter();
+                            adapter.notifyDataSetChanged();
+                            Toast.makeText(getApplicationContext(), "connecting " + chosendevice, Toast.LENGTH_SHORT).show();
+                            Scan.setChecked(false);
+                            d.dismiss();
+                            dialog.dismiss();
+                            Handler Handlechange = new Handler();
+                            Handlechange.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    adapter.notifyDataSetChanged();
+                                }
+                            }, 5000);
+                        }
+                          else{
+                            Toast.makeText(getApplicationContext(), "That is your device", Toast.LENGTH_SHORT).show();
+                            d.dismiss();
+                        }
 
                     }
                 });
                 confirmprompt.create().show();
+
             }
+
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -325,8 +334,5 @@ if(!newdevicesname.contains(devicename))
         }
         return bool.booleanValue();
     };
-
-
-
 
 }
