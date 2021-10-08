@@ -56,7 +56,8 @@ public class Dashboard extends AppCompatActivity {
    ArrayList< BluetoothDevice> NewDevices = new ArrayList<>();
     ArrayList<String> newdevicesname = new ArrayList<>();
     ArrayList<String> DeviceArray = new ArrayList<>();
-    UsersAdapter adapter;
+    ListView devicelist;
+
     ArrayList<BluetoothDevice> pairedDevices;
     Map<String,BluetoothDevice> Device_to_pair=new HashMap<String,BluetoothDevice>();
     ListView DeviceArrayListview=null;
@@ -112,7 +113,7 @@ public class Dashboard extends AppCompatActivity {
         }
         int MY_PERMISSIOMS_REQUEST_ACCESS_COARSE_LOCATION=1;
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.BLUETOOTH,Manifest.permission.BLUETOOTH_ADMIN},MY_PERMISSIOMS_REQUEST_ACCESS_COARSE_LOCATION);
-        ListView devicelist = (ListView) findViewById(R.id.paireddevlist);
+        devicelist = (ListView) findViewById(R.id.paireddevlist);
 
          Scan = (ToggleButton) findViewById(R.id.scan);
 
@@ -162,7 +163,7 @@ public class Dashboard extends AppCompatActivity {
 
         }
 
-        adapter=new UsersAdapter(this,arrayOfUsers);
+        UsersAdapter  adapter=new UsersAdapter(this,arrayOfUsers);
          for(int i=0;i<arrayOfUsers.size();i++)
         Log.d("device: "+i, " "+adapter.getItem(i));
         devicelist.setAdapter(adapter);
@@ -220,6 +221,7 @@ public class Dashboard extends AppCompatActivity {
                         PairDevices(Device_to_pair.get(chosendevice));
                         Log.d("Device is",""+Device_to_pair.get(chosendevice));
                         pairedDevices.add(Device_to_pair.get(chosendevice));
+                        UsersAdapter adapter=(UsersAdapter) devicelist.getAdapter();
                         adapter.notifyDataSetChanged();
                         Toast.makeText(getApplicationContext(), "connecting "+chosendevice, Toast.LENGTH_SHORT).show();
                         Scan.setChecked(false);
