@@ -156,6 +156,7 @@ public  void turnonBlutooth(){
         if (Ischecked) {
             turnonBlutooth();
              TextView devicename=(TextView)findViewById(R.id.devname);
+            // if(mybluetoothAdapter.isEnabled())
              devicename.setText(mybluetoothAdapter.getName());
             Log.d("New device name",""+NewDevices.get(0));
 //         for(int i=0;i<NewDevices.size();i++)

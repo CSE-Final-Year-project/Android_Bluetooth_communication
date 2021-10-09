@@ -5,5 +5,8 @@
     </style>
     <style name="CustomAlertDialogtheme">
         <item name="textColorAlertDialogListItem">@color/some_color</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowIsTranslucent">true</item>
     </style>
+
 </resources>

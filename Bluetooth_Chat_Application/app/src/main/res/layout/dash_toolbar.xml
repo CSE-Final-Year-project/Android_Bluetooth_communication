@@ -29,7 +29,7 @@
         android:checked="true"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <ToggleButton
+    <Button
         android:id="@+id/scan"
         android:layout_width="100dp"
         android:layout_height="match_parent"
@@ -38,8 +38,10 @@
         android:layout_marginRight="10dp"
         android:background="@drawable/searchdevices"
         android:minHeight="48dp"
+        android:text="Scan"
         android:textColor="@color/white"
-        android:textSize="15dp" />
+        android:textSize="15dp"
+        tools:ignore="TouchTargetSizeCheck" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="30dp"
