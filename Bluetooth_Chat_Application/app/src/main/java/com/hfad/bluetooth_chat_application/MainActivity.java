@@ -168,8 +168,6 @@ public  void turnonBlutooth(){
                 @Override
                 public void run() {
 
-
-
                     Log.d("My bluetooth name  : ", mybluetoothAdapter.getName() + "  with address " + mybluetoothAdapter.getAddress());
                     Set<BluetoothDevice>  pairedDevices = mybluetoothAdapter.getBondedDevices();
 
@@ -221,10 +219,10 @@ public  void turnonBlutooth(){
 
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_main,menu);
-
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu){
+//        getMenuInflater().inflate(R.menu.menu_main,menu);
+//
+//        return true;
+//    }
 }

@@ -68,7 +68,7 @@
 
                     android:text="Device name" />
                 <TextView
-
+                    android:id="@+id/devname"
                     android:textColor="@color/black"
                     android:background="#FFFAFA"
                     android:layout_width="200dp"
