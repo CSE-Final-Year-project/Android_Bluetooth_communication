@@ -20,8 +20,10 @@
             android:theme="@style/CustomAlertDialogtheme"
             android:exported="true" />
         <activity
-            android:name=".Dashboard"
+            android:name=".Dashboard_Main"
             android:exported="true" />
+        <activity android:name=".DashboardActivity"
+            android:exported="true"/>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

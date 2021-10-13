@@ -5,38 +5,25 @@ import static android.bluetooth.BluetoothProfile.GATT;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.renderscript.Sampler;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,9 +31,7 @@ import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 
-import java.security.Key;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public final BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
     int REQUEST_DISCOVERY = 1;
-    Set<BluetoothDevice> pairedDevices = null;
+    public static Set<BluetoothDevice> pairedDevices = null;
     Map<String, String> NewDevices = new HashMap<String, String>();
     Map<String, String> PairedList = new HashMap<String, String>();
     Button gobtn;
@@ -80,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
-
+if(mybluetoothAdapter.isEnabled())
+    mybluetoothAdapter.disable();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         turnonBlutooth();
@@ -104,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         pairedDevices = devices;
     }
 
-    private Set<BluetoothDevice> GetDevices() {
+    protected Set<BluetoothDevice> GetDevices() {
         return pairedDevices;
     }
 
@@ -207,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             Log.d("Devices are ", "" + pairedDevices);
-                            Intent DashboardIntent = new Intent(MainActivity.this, Dashboard.class);
+                            Intent DashboardIntent = new Intent(MainActivity.this, Dashboard_Main.class);
                             DashboardIntent.putExtra("PairedDevices", DeviceArray);
                             startActivity(DashboardIntent);
 

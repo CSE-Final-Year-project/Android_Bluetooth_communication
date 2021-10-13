@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public class NewUserAdapter extends BaseAdapter {
     BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 PopupActivity popupActivity;
     private Context context;
-    Dashboard dashboard;
+    Dashboard_Main dashboardMain;
     private ArrayList<NewUser> NewUsers;
     NewUser newUser;
     customButtonListener customListener;
@@ -92,7 +91,7 @@ PopupActivity popupActivity;
 
                             }
                             if(DeviceArray.contains(NewUsers.get(position).bluetoothDevice)) {
-                                Intent DashboardIntent = new Intent(context, Dashboard.class);
+                                Intent DashboardIntent = new Intent(context, Dashboard_Main.class);
                                 DashboardIntent.putExtra("PairedDevices", DeviceArray);
                                 DashboardIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 Log.d("Devices are ", "" + pairedDevices);

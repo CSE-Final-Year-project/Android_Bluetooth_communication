@@ -1,6 +1,8 @@
 package com.hfad.bluetooth_chat_application;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,10 @@ public UsersAdapter(Context context,ArrayList<User> users) {
     this.context=context;
     this.users=users;
 }
+    public UsersAdapter(Context context,int layoutResourceId,ArrayList<User> users) {
+        this.context=context;
+        this.users=users;
+    }
     @Override
     public int getCount() {
         return users.size();
@@ -46,6 +52,7 @@ public UsersAdapter(Context context,ArrayList<User> users) {
         }
             TextView username = (TextView) converterView.findViewById(R.id.user);
             username.setText(users.get(position).getName());
+
             return converterView;
 
     }

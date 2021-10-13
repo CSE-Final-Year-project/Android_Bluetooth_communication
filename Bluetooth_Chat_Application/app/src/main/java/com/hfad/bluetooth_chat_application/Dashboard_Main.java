@@ -4,72 +4,36 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.RunnableFuture;
-import java.util.zip.Inflater;
 
-
-public class Dashboard extends AppCompatActivity {
+/* This class is an activity class which holds the fragments which implements the Interface Listener
+* and handles onItemClickListener whenever the user clicks one one item in the
+* listfragment view to open the correspondent action page fragment view */
+public class Dashboard_Main extends AppCompatActivity implements Dashboard_ListFragment.Listener {
 
     private static final int REQUEST_DISCOVERY = 1;
     private static final int REQUEST_ENABLE =1 ;
     Map<String, String> PairedList = new HashMap<String, String>();
     BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     Button Scan;
-    boolean ispaired=false;
-   ArrayList< BluetoothDevice> NewDevices = new ArrayList<>();
-    public UsersAdapter  Useradapter;
-    NewUserAdapter newUserAdapter;
-    User user;
-   public static ArrayList<User>  arrayOfUsers=new ArrayList<User>();
-
-    ArrayList<String> DeviceArray = new ArrayList<>();
-   public ListView devicelist;
-    String devicename;
-
-    ArrayList<NewUser> newUserArrayList=new ArrayList<NewUser>();
-
-    ArrayList<BluetoothDevice> pairedDevices;
-    Map<String,BluetoothDevice> Device_to_pair=new HashMap<String,BluetoothDevice>();
-    ListView DeviceArrayListview=null;
     ActivityResultLauncher<Intent> activityResultLauncher=registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -83,33 +47,20 @@ public class Dashboard extends AppCompatActivity {
 
     );
 
-    public void setUseradapter(UsersAdapter useradapter) {
-        Useradapter = useradapter;
-    }
-
-    public ListView getDevicelist() {
-        return devicelist;
-    }
-
-    public ArrayList<User> getArrayOfUsers() {
-        return arrayOfUsers;
-    }
 
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-        if(arrayOfUsers.size()>0)
-        arrayOfUsers.clear();
-        mybluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
-        devicename=mybluetoothAdapter.getName();
-        if(NewDevices!=null){
-            NewDevices.clear();
-        }
+        Toolbar mytoolbar = (Toolbar) findViewById(R.id.dashtool);
+        setSupportActionBar(mytoolbar);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
         int MY_PERMISSIOMS_REQUEST_ACCESS_COARSE_LOCATION=1;
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.BLUETOOTH,Manifest.permission.BLUETOOTH_ADMIN},MY_PERMISSIOMS_REQUEST_ACCESS_COARSE_LOCATION);
-        devicelist = (ListView) findViewById(R.id.paireddevlist);
+
          Scan = (Button) findViewById(R.id.scan);
         Scan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,29 +70,9 @@ public class Dashboard extends AppCompatActivity {
 
         });
 
+
 //        devicelist.setAdapter(adapter);
-         pairedDevices = (ArrayList<BluetoothDevice>) getIntent().getExtras().get("PairedDevices");
 
-        //there are paired devices. get the name and addresses of each paired device
-        for (BluetoothDevice device : pairedDevices) {
-            String devicename = device.getName();
-            String deviceMacAddress = device.getAddress();
-            PairedList.put(devicename, deviceMacAddress);
-            DeviceArray.add(devicename);
-            user=new User(devicename,deviceMacAddress);
-            if(!arrayOfUsers.contains(user))
-            arrayOfUsers.add(user);
-           // Log.d("Paired Devices: ", newUser.username );
-
-        }
-
-        Useradapter=new UsersAdapter(this,arrayOfUsers);
-         for(int i=0;i<arrayOfUsers.size();i++)
-        Log.d("device: "+i, " "+Useradapter.getItem(i));
-        devicelist.setAdapter(Useradapter);
-        ArrayAdapter<String> DeviceAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1,
-                DeviceArray);
         Switch mySwitch = (Switch) findViewById(R.id.bluetooth_enabling);
         //devicelist.setAdapter(DeviceAdapter);
         mySwitch.setOnClickListener(new View.OnClickListener() {
@@ -172,11 +103,10 @@ public class Dashboard extends AppCompatActivity {
     //Function that Displays the list of the available  devices
     public void showList(){
         //setContentView(R.layout.dialog_demo);
-      Intent popIntent=new Intent(Dashboard.this,PopupActivity.class);
+      Intent popIntent=new Intent(Dashboard_Main.this,PopupActivity.class);
         activityResultLauncher.launch(popIntent);
 
     }
-
 
     @Override
     protected void onDestroy() {
@@ -185,8 +115,6 @@ public class Dashboard extends AppCompatActivity {
     }
 //Function that lets your bbluetooth get turned on
     public void turnonBlutooth() {
-//    IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-//    registerReceiver(receiver, filter);
         mybluetoothAdapter.startDiscovery();
         if (mybluetoothAdapter == null) {
 
@@ -199,13 +127,27 @@ public class Dashboard extends AppCompatActivity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             activityResultLauncher.launch(enableBtIntent);
 
-            //Log.d(" Is it on ?: "," "+mybluetoothAdapter.isEnabled());
         }
 
-
     }
-    //Function that makes your device to be discovered
-
-    //Function that make pair
-
+    //This is the abstract methode which is in Dashboard_Listfragement to handle onitemclick
+    @Override
+    public void itemClicked(long id) {
+        View fragmentContainer = findViewById(R.id.fragment_container);
+        if (fragmentContainer != null) {
+            ActionPageFragment actionPageFragment=new ActionPageFragment();
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            actionPageFragment.setUser(id);
+            ft.replace(R.id.fragment_container, actionPageFragment);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.addToBackStack(null);
+            ft.commit();
+        }
+        else{
+        Log.d("clicked","id "+id);
+        Intent intent = new Intent(this, DashboardActivity.class);
+        intent.putExtra(DashboardActivity.EXTRA_USER_ID, (int)id);
+        startActivity(intent);
+    }
+    }
 }

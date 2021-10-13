@@ -20,8 +20,6 @@
         android:minHeight="48dp"
         android:paddingLeft="10dp"
         android:showText="true"
-        android:switchMinWidth="70dp"
-        android:switchPadding="20dp"
         android:text="Turn"
         android:textColor="@color/black"
         android:textOff="Off"
@@ -42,13 +40,5 @@
         android:textColor="@color/white"
         android:textSize="15dp"
         tools:ignore="TouchTargetSizeCheck" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:text="Turn scan"
-        android:layout_gravity="right"
-        android:layout_marginTop="15dp"
-        android:layout_marginRight="7dp"
-        />
 
 </androidx.appcompat.widget.Toolbar>
