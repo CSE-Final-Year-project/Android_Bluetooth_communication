@@ -3,4 +3,6 @@
     <string name="dialog_text">Loading paired devices</string>
     <string name="dialog_title">Discovering.........</string>
     <string name="Turn_Bluetooth">Turn</string>
+    <string name="settings">settings</string>
+    <string name="call">call</string>
 </resources>

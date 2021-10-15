@@ -8,56 +8,87 @@
     android:layout_gravity="center"
     android:layout_centerInParent="true"
     android:background="@color/background">
+    <include
+        android:id="@+id/actiontoolbar"
+        layout="@layout/toolbar"
+        tools:layout_editor_absoluteX="56dp"
+        tools:layout_editor_absoluteY="4dp" />
 
-    <TextView
-        android:id="@+id/user_name"
-        android:layout_width="606dp"
-        android:layout_height="154dp"
-        android:layout_marginStart="68dp"
-        android:layout_marginTop="124dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/black"
+    <ScrollView
+        android:id="@+id/scrole"
+        android:layout_width="754dp"
+        android:layout_height="993dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout6"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        app:layout_constraintTop_toBottomOf="@+id/actiontoolbar">
+
+        <LinearLayout
+            android:id="@+id/my_message_pane_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center"
+            android:layout_marginLeft="@dimen/speech_bubble_corners"
+            android:layout_marginRight="@dimen/speech_bubble_corners"
+            android:background="@drawable/shape"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="131dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="50dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/text_messages_shape"
+                android:paddingBottom="50dp"
+                android:text="klhashh;lafoiewytowtbo;hikwehiolwghlwgkn" />
+
+            <TextView
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="50dp"
+                android:background="@drawable/your_message_shape"
+                android:paddingBottom="50dp"
+                android:text="klhashh;lafoiewytowtbo;hikwehiolwghlwgkn" />
+        </LinearLayout>
+    </ScrollView>
 
     <LinearLayout
-        android:id="@+id/linearLayout3"
-        android:layout_width="821dp"
-        android:layout_height="861dp"
-        android:layout_gravity="center"
-
-        android:layout_margin="20dp"
-        android:layout_marginTop="144dp"
-        android:background="@drawable/shape"
-        android:orientation="vertical"
+        android:id="@+id/linearLayout6"
+        android:layout_width="950dp"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="4dp"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.656"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/user_name">
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent">
 
+        <EditText
+            android:id="@+id/type_message"
+            android:layout_width="179dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="70dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/shape"
+            android:gravity="center"
+            android:hint="Type your message"
+            android:minHeight="48dp"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <Button
+            android:layout_width="111dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="2dp"
+            android:gravity="center"
+            android:minWidth="48dp"
+            android:text="Send"
+            tools:ignore="TouchTargetSizeCheck" />
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="143dp"
-        android:layout_height="121dp"
-        android:layout_marginTop="144dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toEndOf="@+id/user_name"
-        app:layout_constraintTop_toBottomOf="@+id/imageView2"
-        app:srcCompat="@drawable/callimage" />
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="173dp"
-        android:layout_height="190dp"
-        android:layout_marginTop="48dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.072"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/img" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

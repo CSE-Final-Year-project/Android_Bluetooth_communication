@@ -193,6 +193,7 @@ if(mybluetoothAdapter.isEnabled())
                         @Override
                         public void onClick(View v) {
                             Log.d("Devices are ", "" + pairedDevices);
+                            Class<Dashboard_Main> test = Dashboard_Main.class;
                             Intent DashboardIntent = new Intent(MainActivity.this, Dashboard_Main.class);
                             DashboardIntent.putExtra("PairedDevices", DeviceArray);
                             startActivity(DashboardIntent);

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ PopupActivity popupActivity;
         NewUsers.get(position).button=(Button) converterView.findViewById(R.id.connectbtn);
         converterView.setTag(NewUsers.get(position));
             final String temp=getItem(position);
-            Log.d("name of the devices:  ",temp);
+          //  Log.d("name of the devices:  ",temp);
 
             NewUsers.get(position).devicename=temp;
 
@@ -97,6 +98,8 @@ PopupActivity popupActivity;
                                 Log.d("Devices are ", "" + pairedDevices);
                                 context.startActivity(DashboardIntent);
                             }
+                            else
+                                Toast.makeText(context, "Could not connect "+temp, Toast.LENGTH_SHORT).show();
 
 
                         }

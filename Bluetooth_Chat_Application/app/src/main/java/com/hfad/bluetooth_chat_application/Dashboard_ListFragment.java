@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.ListFragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +28,7 @@ public class Dashboard_ListFragment extends ListFragment{
     Listener listener;
     public UsersAdapter  Useradapter;
     MainActivity Main;
-    Map<String, String> PairedList = new HashMap<String, String>();
+   public static Map<String, BluetoothDevice> PairedList = new HashMap<String,BluetoothDevice>();
     BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     Button Scan;
     String devicename;
@@ -58,9 +59,11 @@ public class Dashboard_ListFragment extends ListFragment{
         //there are paired devices. get the name and addresses of each paired device
 
         for (BluetoothDevice device : pairedDevices) {
+            Log.d("device: ",""+device.getUuids());
+            Log.d("address: ",device.getAddress());
             String devicename = device.getName();
             String deviceMacAddress = device.getAddress();
-            PairedList.put(devicename, deviceMacAddress);
+            PairedList.put(devicename, device);
             DeviceArray.add(devicename);
             user=new User(devicename,deviceMacAddress);
             if(!arrayOfUsers.contains(user))
