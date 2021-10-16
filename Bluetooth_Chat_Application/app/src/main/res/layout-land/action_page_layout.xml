@@ -29,18 +29,16 @@
         <LinearLayout
             android:id="@+id/my_message_pane_layout"
             android:layout_width="match_parent"
-            android:layout_height="459dp"
-            android:layout_gravity="center"
+            android:layout_height="fill_parent"
             android:layout_marginLeft="@dimen/speech_bubble_corners"
-            android:layout_marginRight="@dimen/speech_bubble_corners"
             android:background="@drawable/shape"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="131dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="10dp"
+
+                android:layout_marginLeft="10dp"
                 android:background="@drawable/text_messages_shape"
                 android:paddingBottom="50dp"
                 android:text="klhashh;lafoiewytowtbo;hikwehiolwghlwgkn" />
@@ -48,8 +46,7 @@
             <TextView
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="50dp"
+                android:layout_marginLeft="200dp"
                 android:background="@drawable/your_message_shape"
                 android:paddingBottom="50dp"
                 android:text="klhashh;lafoiewytowtbo;hikwehiolwghlwgkn" />
@@ -83,6 +80,7 @@
             tools:ignore="TouchTargetSizeCheck" />
 
         <Button
+            android:id="@+id/sendmessgae"
             android:layout_width="150dp"
             android:layout_height="match_parent"
             android:layout_gravity="bottom"

@@ -29,7 +29,7 @@ public class Dashboard_ListFragment extends ListFragment{
     public UsersAdapter  Useradapter;
     MainActivity Main;
    public static Map<String, BluetoothDevice> PairedList = new HashMap<String,BluetoothDevice>();
-    BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+ public static    BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     Button Scan;
     String devicename;
     Dashboard_Main dashboardMain;
