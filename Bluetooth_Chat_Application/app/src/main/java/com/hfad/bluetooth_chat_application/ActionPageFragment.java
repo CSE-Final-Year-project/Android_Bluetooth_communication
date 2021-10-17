@@ -28,6 +28,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import java.io.IOException;
@@ -223,13 +224,12 @@ public class ActionPageFragment extends Fragment {
                     bytes = mmInStream.read(buffer);
                     final String incomingMessage = new String(buffer, 0, bytes);
                     Log.d(TAG, "InputStream: " + incomingMessage);
-
-                    handler.post(new Runnable() {
+                   getActivity().runOnUiThread(new Runnable() {
 
                         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                         @Override
                         public void run() {
-
+                            Log.d(TAG,"Incoming message: "+incomingMessage);
                             LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
                                     LinearLayout.LayoutParams.WRAP_CONTENT,
                                     LinearLayout.LayoutParams.MATCH_PARENT);
@@ -269,6 +269,7 @@ public class ActionPageFragment extends Fragment {
 
 
                 } catch (IOException e) {
+                    //Toast.makeText(getActivity(), "write: Error reading Input Stream" + e.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
                     break;
                 }
@@ -282,6 +283,7 @@ public class ActionPageFragment extends Fragment {
             try {
                 mmOutStream.write(bytes);
             } catch (IOException e) {
+               // Toast.makeText(getActivity(), "write: Error writing to output stream", Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
             }
         }
