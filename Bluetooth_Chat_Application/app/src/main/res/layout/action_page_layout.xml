@@ -17,74 +17,65 @@
 
 
     <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_width="fill_parent"
+        android:layout_height="579dp"
+        android:layout_marginStart="4dp"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout6"
-        app:layout_constraintTop_toBottomOf="@+id/actiontoolbar">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/actiontoolbar"
+        app:layout_constraintVertical_bias="0.0"
+        tools:ignore="SpeakableTextPresentCheck">
 
         <LinearLayout
             android:id="@+id/my_message_pane_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="400dp"
+            android:layout_margin="40dp"
             android:background="@drawable/shape"
             android:orientation="vertical"
-            android:layout_margin="40dp"
             app:layout_constraintBottom_toTopOf="@+id/linearLayout6"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/actiontoolbar">
 
-            <TextView
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:background="@drawable/text_messages_shape"
-                android:paddingBottom="50dp"
-                android:text="klhashh;lafoiewytowtbo;hikwehiolwghlwgkn" />
-
-            <TextView
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="140dp"
-                android:background="@drawable/your_message_shape"
-                android:paddingBottom="50dp"
-                android:text="klhashh;lafoiewytowtbo;hikwehiolwghlwgkn" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
     <LinearLayout
-            android:id="@+id/linearLayout6"
-            android:layout_width="match_parent"
-            android:layout_height="69dp"
+        android:id="@+id/linearLayout6"
+        android:background="@color/background"
+        android:layout_width="match_parent"
+        android:layout_height="69dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="4dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/type_message"
+            android:layout_width="179dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="4dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            android:layout_marginLeft="60dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/shape"
+            android:gravity="center"
+            android:hint="Type your message"
+            android:minHeight="48dp" />
 
-            <EditText
-                android:id="@+id/type_message"
-                android:layout_width="179dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginTop="15dp"
-                android:layout_marginLeft="60dp"
-                android:background="@drawable/shape"
-                android:gravity="center"
-                android:hint="Type your message"
-                android:minHeight="48dp" />
-
-            <Button
-                android:id="@+id/sendmessgae"
-                android:layout_width="111dp"
-                android:layout_height="55dp"
-                android:layout_gravity="right"
-                android:layout_marginTop="15dp"
-                android:layout_marginRight="2dp"
-                android:gravity="center"
-                android:minWidth="48dp"
-                android:text="Send"
-                android:layout_marginLeft="2dp"
-                tools:ignore="TouchTargetSizeCheck" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/sendmessgae"
+            android:layout_width="111dp"
+            android:layout_height="55dp"
+            android:layout_gravity="right"
+            android:layout_marginLeft="2dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="2dp"
+            android:gravity="center"
+            android:minWidth="48dp"
+            android:text="Send"
+            tools:ignore="TouchTargetSizeCheck" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -56,7 +56,8 @@ public class DashboardActivity extends AppCompatActivity {
         int UserId = (int) getIntent().getExtras().get(EXTRA_USER_ID);
         frag.setUser(UserId);
     }
-     @Override
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.action_page_menu,menu);
         return super.onCreateOptionsMenu(menu);

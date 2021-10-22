@@ -46,6 +46,7 @@ public class ActionPageFragment extends Fragment {
     public static ArrayList<User> arrayOfUsers = new ArrayList<User>();
     private static final UUID MY_UUID_INSECURE=UUID.fromString("a1682af1-f7e0-49ec-b977-b93856cf5b79");
     private UUID deviceUUID;
+    BluetoothDevice bluetoothDevice;
     Button sendmessagebtn;
     ConnectedThread mConnectedThread;
     private BluetoothDevice mmDevice;
@@ -57,6 +58,7 @@ public class ActionPageFragment extends Fragment {
     EditText send_data;
     TextView outgoing_text_view ;
     TextView Incoming_text_view;
+    String Busername;
     StringBuilder messages;
     Dashboard_ListFragment dashboardListFragment;
     private long userId;
@@ -87,7 +89,6 @@ public class ActionPageFragment extends Fragment {
     public void onStart() {
         super.onStart();
         View view = getView();
-        BluetoothDevice bluetoothDevice;
         arrayOfUsers = dashboardListFragment.arrayOfUsers;
         if (view != null) {
 
@@ -96,6 +97,7 @@ public class ActionPageFragment extends Fragment {
             Username.setText(user.getName());
             send_data=(EditText)view.findViewById(R.id.type_message);
             sendmessagebtn=(Button)view.findViewById(R.id.sendmessgae);
+            Busername=user.getName();
             bluetoothDevice = dashboardListFragment.PairedList.get(user.getName());
             Log.d("devicename:", user.getName());
             Log.d("device: ", "" + bluetoothDevice);
@@ -229,6 +231,8 @@ public class ActionPageFragment extends Fragment {
                         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                         @Override
                         public void run() {
+                            Log.d(TAG,"BUSER: "+Busername+"\n bluetooth name :"+bluetoothDevice.getName());
+                            if(Busername.equals(bluetoothDevice.getName())){
                             Log.d(TAG,"Incoming message: "+incomingMessage);
                             LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
                                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -260,9 +264,12 @@ public class ActionPageFragment extends Fragment {
                             Incoming_text_view.setPadding(5, 3, 0, 50);
                             Incoming_text_view.setTypeface(null, Typeface.ITALIC);
                             Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
-                            Incoming_text_view.setText(incomingMessage);
-                            childLayout.addView(Incoming_text_view, 0);
-                            mylayout.addView(childLayout);
+
+                                Incoming_text_view.setText(incomingMessage);
+                                Toast.makeText(getActivity(), ""+Busername+" has sent you a message!", Toast.LENGTH_SHORT).show();
+                                childLayout.addView(Incoming_text_view, 0);
+                                mylayout.addView(childLayout);
+                            }
 
                         }
                     });
@@ -283,7 +290,7 @@ public class ActionPageFragment extends Fragment {
             try {
                 mmOutStream.write(bytes);
             } catch (IOException e) {
-               // Toast.makeText(getActivity(), "write: Error writing to output stream", Toast.LENGTH_SHORT).show();
+               Toast.makeText(getActivity(), "write: Error writing to output stream", Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
             }
         }
@@ -326,8 +333,9 @@ public class ActionPageFragment extends Fragment {
         childLayout.addView(outgoing_text_view, 0);
         //childLayout.removeView(outgoing_text_view);
         mylayout.addView(childLayout);
-       //mylayout.removeView(childLayout);
+        send_data.getText().clear();
         mConnectedThread.write(bytes);
+
 
 
     }
