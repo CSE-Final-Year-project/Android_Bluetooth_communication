@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/attach_file.xml" value="0.1398148148148148" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/bluetooth_icon.xml" value="0.17291666666666666" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/bottom_part.xml" value="0.13055555555555556" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/call.xml" value="0.16510416666666666" />
@@ -13,6 +14,8 @@
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.1578125" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/messageicon.xml" value="0.16510416666666666" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/roundedbutton.xml" value="0.1828125" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/send_layout.xml" value="0.1398148148148148" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/send_message.xml" value="0.1398148148148148" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/shape.xml" value="0.1765625" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/text_messages_shape.xml" value="0.1" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/your_message_shape.xml" value="0.18385416666666668" />
@@ -25,7 +28,7 @@
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout-sw600dp/activity_dashboard.xml" value="0.1" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout-sw600dp/activity_main.xml" value="0.146484375" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout-sw600dp/dialog_demo.xml" value="0.134375" />
-        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/action_page_layout.xml" value="0.1619047619047619" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/action_page_layout.xml" value="0.22" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/activity_dashboard.xml" value="0.1953125" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/activity_dashboard1.xml" value="0.2" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/activity_main.xml" value="0.25" />
