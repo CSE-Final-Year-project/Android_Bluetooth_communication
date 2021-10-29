@@ -46,6 +46,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
@@ -112,7 +114,8 @@ public class ActionPageFragment extends Fragment {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                       //openFile();
+                        //openFile();
+                        final InputStream imageStream;
                         Intent data = result.getData();
                         String filePath = mCurrentPhotoPath;
                         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -121,50 +124,69 @@ public class ActionPageFragment extends Fragment {
                         options.inJustDecodeBounds = false;
                         options.inTempStorage = new byte[16 * 1024];
                         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
+                        Uri imageUri = Uri.parse(filePath);
+                        Bitmap selectedImage = null;
                         try {
-                             mImageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.parse(filePath));
+                            imageStream = getActivity().getContentResolver().openInputStream(imageUri);
+                            selectedImage = BitmapFactory.decodeStream(imageStream, null, options);
+                            int origWidth = selectedImage.getWidth();
+                            int origHeight = selectedImage.getHeight();
+                            final int destWidth = 600;
+                            imageView.setImageBitmap(selectedImage);
+                            if (origWidth > destWidth) {
+                                // picture is wider than we want it, we calculate its target height
+                                int destHeight = origHeight / (origWidth / destWidth);
+                                // we create an scaled bitmap so it reduces the image, not just trim it
+                                Bitmap b2 = Bitmap.createScaledBitmap(selectedImage, destWidth, destHeight, false);
+                                ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+                                // compress to the format you want, JPEG, PNG...
+                                // 70 is the 0-100 quality percentage
+                                b2.compress(Bitmap.CompressFormat.JPEG, 70, outStream);
+                                // we save the file, at least until we have made use of it
+//                                File f = new File(Environment.getExternalStorageDirectory()
+//                                        + File.separator + "test.jpg");
+//                                File f=new File(imageUri.toString());
+//                                f.createNewFile();
+                                //write the bytes in file
+                                FileOutputStream fo = new FileOutputStream(createImageFile());
+                                fo.write(outStream.toByteArray());
+                                File fdelete = new File(imageUri.getPath());
+                                if (fdelete.exists()) {
+                                    if (fdelete.delete()) {
+                                        System.out.println("file Deleted :" + imageUri.getPath());
+                                    } else {
+                                        System.out.println("file not Deleted :" + imageUri.getPath());
+                                    }
+                                }
+                                // remember close de FileOutput
+                                fo.close();
+
+                            }
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
 
-                       //Bitmap photo = (Bitmap) data.getExtras().get("data");
+//
+//                        try {
+//                             mImageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.parse(filePath));
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+
+                        //Bitmap photo = (Bitmap) data.getExtras().get("data");
                         //Uri uri=data.getData();
-                        imageView.setImageBitmap(mImageBitmap);
+//                        imageView.setImageBitmap(mImageBitmap);
                         //String src=uri.getPath();
-                       // File source=new File(src);
+                        // File source=new File(src);
                         //String filename=uri.getLastPathSegment();
-                         Log.d(TAG,"File choosen is "+filePath);
+                        Log.d(TAG, "File choosen is " + filePath);
                         // String myfile=filePath.substring(6,filePath.length());
 
                         // Log.d(TAG,"The actual file name is "+filePath.getName());
-                        Bitmap bitmap = null;
-                        Uri uri = Uri.parse(filePath);
-                        Log.d(TAG,"the new file: "+ uri.getPath());
-                        try ( InputStream is = new FileInputStream(filePath)) {
-                            bitmap = BitmapFactory.decodeStream( is );
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+
                         //Bitmap bmp= BitmapFactory.decodeFile(filePath, options);
-                        FileOutputStream out = null;
-                        try {
-                            out = new FileOutputStream(filePath);
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
-                            // PNG is a lossless format, the compression factor (100) is ignored
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        } finally {
-                            try {
-                                if (out != null) {
-                                    out.close();
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
 
                     }
                 }
@@ -177,13 +199,33 @@ public class ActionPageFragment extends Fragment {
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                        // openGallery();
+
                         Intent data = result.getData();
-                        Uri uri=data.getData();
-                        String src=uri.getPath();
-                        File source=new File(src);
-                        String filename=uri.getLastPathSegment();
-                        Log.d(TAG,"File choosen is "+src);
-                        Log.d(TAG,"The actual file name is "+source.getName());
+                        final Uri imageUri = data.getData();
+                        final InputStream imageStream;
+                        try {
+                            imageStream = getActivity().getContentResolver().openInputStream(imageUri);
+                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                            imageView.setImageBitmap(selectedImage);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+
+//                        Uri uri=data.getData();
+//                        String src=uri.getPath();
+//                        src = src.replaceAll(" ", "%20");
+//                        File source=new File(src);
+//                        try {
+//                            Bitmap bitmap= MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
+//                            imageView.setImageBitmap(bitmap);
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+
+
+                       // String filename=uri.getLastPathSegment();
+//                        Log.d(TAG,"File choosen is "+src);
+//                        Log.d(TAG,"The actual file name is "+source.getName());
 
                     }
                 }
@@ -253,8 +295,8 @@ public class ActionPageFragment extends Fragment {
                   @Override
                   public void onClick(View v) {
                       try {
-                          captureImage();
-                      } catch (IOException e) {
+                         captureImage();
+                      } catch (Exception e) {
                           e.printStackTrace();
                       }
                   }
