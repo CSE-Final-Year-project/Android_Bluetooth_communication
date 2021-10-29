@@ -8,7 +8,11 @@
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/bottom_part.xml" value="0.13055555555555556" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/call.xml" value="0.16510416666666666" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/call_icon.xml" value="0.18645833333333334" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/camera_file_shape.xml" value="0.15462962962962962" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/document_file.xml" value="0.13020833333333334" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/documentt.xml" value="0.13020833333333334" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/drawable_message_icon.xml" value="0.18645833333333334" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/galley_file.xml" value="0.15462962962962962" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/ic_baseline_bluetooth_searching_24.xml" value="0.1" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/ic_baseline_message_24.xml" value="0.16510416666666666" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.1578125" />
@@ -39,6 +43,7 @@
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/fragment_dashboard1.xml" value="0.1765625" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/fragment_users_list.xml" value="0.1953125" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/newdevice.xml" value="0.25" />
+        <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/pick_file.xml" value="0.33" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/popup_paired_devices.xml" value="0.1046875" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/toolbar.xml" value="0.16614583333333333" />
         <entry key="..\:/Android_Bluetooth_communication/Bluetooth_Chat_Application/app/src/main/res/layout/toolbar_main.xml" value="0.1953125" />

@@ -35,12 +35,14 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -105,6 +107,9 @@ public class ActionPageFragment extends Fragment {
     public static final String PDF = "application/pdf";
     public static final String VIDEO="video/*";
     public static final String XLS = "application/vnd.ms-excel";
+    ImageView documentImageview;
+    ImageView cameraImageview;
+    ImageView galleryImageView;
     Dashboard_ListFragment dashboardListFragment;
     private long userId;
     Bitmap mImageBitmap = null;
@@ -150,6 +155,7 @@ public class ActionPageFragment extends Fragment {
                                 //write the bytes in file
                                 FileOutputStream fo = new FileOutputStream(createImageFile());
                                 fo.write(outStream.toByteArray());
+                                //deletting tthe overwritten file
                                 File fdelete = new File(imageUri.getPath());
                                 if (fdelete.exists()) {
                                     if (fdelete.delete()) {
@@ -232,6 +238,27 @@ public class ActionPageFragment extends Fragment {
             }
 
     );
+    ActivityResultLauncher<Intent> document_ActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // openFile();
+
+                        Intent data = result.getData();
+                        Uri uri=data.getData();
+                        String src=uri.getPath();
+                        src = src.replaceAll(" ", "%20");
+                        File source=new File(src);
+                         String filename=uri.getLastPathSegment();
+                        Log.d(TAG,"File choosen is "+src);
+                        Log.d(TAG,"The actual file name is "+source.getName());
+
+                    }
+                }
+            }
+
+    );
 
     private void copyFile(File source,File destination) throws IOException {
         FileChannel in=new FileInputStream(source).getChannel();
@@ -294,13 +321,50 @@ public class ActionPageFragment extends Fragment {
             SendFilebtn.setOnClickListener(new View.OnClickListener() {
                   @Override
                   public void onClick(View v) {
-                      try {
-                         captureImage();
-                      } catch (Exception e) {
-                          e.printStackTrace();
+                 LayoutInflater inflater=(LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                 View popupView=inflater.inflate(R.layout.pick_file,null);
+                      if(popupView!=null) {
+                          documentImageview=(ImageView)popupView.findViewById(R.id.document) ;
+                          cameraImageview=(ImageView)popupView.findViewById(R.id.camera);
+                          galleryImageView=(ImageView)popupView.findViewById(R.id.imagefile);
+                          //create the popup womdow
+                          int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                          int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                          boolean focusable = true;//lets tap outside makes window to dismiss
+                          final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+                          //show the popup window
+                          popupWindow.showAtLocation(view, Gravity.BOTTOM, 4, 90);
+                          popupWindow.setElevation(40);
+                          //dismiss the window when touched
+                          documentImageview.setOnClickListener(new View.OnClickListener() {
+                              @Override
+                              public void onClick(View v) {
+                                  openFile();
+                                  popupWindow.dismiss();
+                              }
+                          });
+                          cameraImageview.setOnClickListener(new View.OnClickListener() {
+                              @Override
+                              public void onClick(View v) {
+                                  try {
+                                      captureImage();
+                                      popupWindow.dismiss();
+                                  } catch (IOException e) {
+                                      e.printStackTrace();
+                                  }
+                              }
+                          });
+                          galleryImageView.setOnClickListener(new View.OnClickListener() {
+                              @Override
+                              public void onClick(View v) {
+                                  openGallery();
+                                  popupWindow.dismiss();
+                              }
+                          });
                       }
                   }
               });
+
             TextView Username = (TextView) view.findViewById(R.id.user_name);
             User user = arrayOfUsers.get((int) userId);
             Username.setText(user.getName());
@@ -381,7 +445,7 @@ public class ActionPageFragment extends Fragment {
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.putExtra(Intent.EXTRA_MIME_TYPES,mimetypes);
         intent=Intent.createChooser(intent,"Choose File to send");
-        activityResultLauncher.launch(intent);
+        document_ActivityResultLauncher.launch(intent);
     }
     public void openGallery(){
         String[] mimetypes = {IMAGE};

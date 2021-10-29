@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape
+            android:innerRadius="0dp"
+            android:shape="oval"
+            android:thicknessRatio="1.9"
+            android:useLevel="false"
+            >
+            <solid android:color="@color/rose_color"/>
+            <stroke android:width="0dp"
+                android:color="@color/centralcolor"/>
+
+        </shape>
+    </item>
+    <item android:drawable="@drawable/image_file"
+        android:bottom="20dp"
+        android:left="20dp"
+        android:right="20dp"
+        android:top="20dp"
+        />
+</layer-list>

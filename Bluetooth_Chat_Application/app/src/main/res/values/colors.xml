@@ -15,5 +15,7 @@
     <color name="round_gradient_button_start_color">#DC2424</color>
     <color name="round_gradient_button_end_color">#4A569D</color>
     <color name="yours_color">#4D7A80</color>
+    <color name="colorAcent">#009688</color>
+    <color name="rose_color">#CC7D96</color>
 
 </resources>
