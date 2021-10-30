@@ -68,7 +68,7 @@ public class DashboardActivity extends AppCompatActivity {
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
     public static final String EXTRA_USER_ID = "Id";
     Set<BluetoothDevice> pairedDevices=MainActivity.pairedDevices;
-
+    SoftInputAssist softInputAssist;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +88,7 @@ public class DashboardActivity extends AppCompatActivity {
         // frag.setWorkout(1);
         int UserId = (int) getIntent().getExtras().get(EXTRA_USER_ID);
         frag.setUser(UserId);
+        //softInputAssist = new SoftInputAssist(this);
         arrayOfUsers = dashboardListFragment.arrayOfUsers;
         User user = arrayOfUsers.get((int) UserId);
         bluetoothDevice = dashboardListFragment.PairedList.get(user.getName());

@@ -22,6 +22,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.utils.widget.ImageFilterView;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -113,10 +114,14 @@ public class ActionPageFragment extends Fragment {
     Dashboard_ListFragment dashboardListFragment;
     private long userId;
     Bitmap mImageBitmap = null;
-    ImageView imageView;
+   // ImageView imageView;
+   private SoftInputAssist softInputAssist;
     String[] mimetypes = {DOC,DOCX,XLS,TEXT,PDF,VIDEO,AUDIO};
     ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                private ImageView NewImageView;
+
+                @RequiresApi(api = Build.VERSION_CODES.M)
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
@@ -138,7 +143,7 @@ public class ActionPageFragment extends Fragment {
                             int origWidth = selectedImage.getWidth();
                             int origHeight = selectedImage.getHeight();
                             final int destWidth = 600;
-                            imageView.setImageBitmap(selectedImage);
+                           // imageView.setImageBitmap(selectedImage);
                             if (origWidth > destWidth) {
                                 // picture is wider than we want it, we calculate its target height
                                 int destHeight = origHeight / (origWidth / destWidth);
@@ -169,8 +174,22 @@ public class ActionPageFragment extends Fragment {
                                 // remember close de FileOutput
                                 fo.close();
                                 Uri photoUri=FileProvider.getUriForFile(getActivity(),BuildConfig.APPLICATION_ID+".provider",myfile);
-
-                                imageView.setOnClickListener(new View.OnClickListener() {
+                                LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                                outgoing_msg_params.width = 200;
+                                outgoing_msg_params.height=
+                                        outgoing_msg_params.leftMargin = 180;
+                                outgoing_msg_params.topMargin = 5;
+                                outgoing_msg_params.rightMargin = 10;
+                                NewImageView = new ImageView(getActivity());
+                                NewImageView.setLayoutParams(new TableLayout.LayoutParams(
+                                        outgoing_msg_params));
+                                NewImageView.setPadding(5, 5, 5, 5);
+                                NewImageView.setForegroundGravity(Gravity.LEFT | Gravity.CENTER);
+                                NewImageView.setImageBitmap(selectedImage);
+                                mylayout.addView(NewImageView);
+                                NewImageView.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
                                         Intent intent=new Intent(Intent.ACTION_VIEW);
@@ -214,6 +233,7 @@ public class ActionPageFragment extends Fragment {
     );
     ActivityResultLauncher<Intent> image_ActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @RequiresApi(api = Build.VERSION_CODES.M)
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
@@ -223,11 +243,26 @@ public class ActionPageFragment extends Fragment {
                         final Uri imageUri = data.getData();
 
                         final InputStream imageStream;
+                        ImageView NewImageView;
                         try {
                             imageStream = getActivity().getContentResolver().openInputStream(imageUri);
                             final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                            imageView.setImageBitmap(selectedImage);
-                            imageView.setOnClickListener(new View.OnClickListener() {
+                                NewImageView = new ImageView(getActivity());
+                                LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                                outgoing_msg_params.width = 200;
+                                outgoing_msg_params.height=
+                                outgoing_msg_params.leftMargin = 180;
+                                outgoing_msg_params.topMargin = 5;
+                                outgoing_msg_params.rightMargin = 10;
+                                NewImageView.setLayoutParams(new TableLayout.LayoutParams(
+                                        outgoing_msg_params));
+                                NewImageView.setPadding(5, 5, 5, 5);
+                                NewImageView.setForegroundGravity(Gravity.LEFT | Gravity.CENTER);
+                                NewImageView.setImageBitmap(selectedImage);
+                                mylayout.addView(NewImageView);
+                            NewImageView.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                    // Uri photoUri=FileProvider.getUriForFile(getActivity(),BuildConfig.APPLICATION_ID+".provider",new File(imageUri.getPath()));
@@ -258,7 +293,7 @@ public class ActionPageFragment extends Fragment {
 //                        Log.d(TAG,"The actual file name is "+source.getName());
 
                     }
-                }
+                    }
             }
 
     );
@@ -314,6 +349,7 @@ public class ActionPageFragment extends Fragment {
                              Bundle savedInstanceState) {
         arrayOfUsers = dashboardListFragment.arrayOfUsers;
         return inflater.inflate(R.layout.action_page_layout, container, false);
+
     }
 
     public void onCreate(Bundle savedInstanceState) {
@@ -325,8 +361,12 @@ public class ActionPageFragment extends Fragment {
             if (uriFilePath == null && savedInstanceState.getString("uri_file_path") != null) {
                 uriFilePath = Uri.parse(savedInstanceState.getString("uri_file_path"));
         }
+            softInputAssist=new SoftInputAssist(getActivity());
+
 
     }
+
+
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -344,7 +384,8 @@ public class ActionPageFragment extends Fragment {
         arrayOfUsers = dashboardListFragment.arrayOfUsers;
         if (view != null) {
               Button SendFilebtn=(Button)view.findViewById(R.id.attachFilebutton);
-            imageView=(ImageView) view.findViewById(R.id.cameraimage);
+            //imageView=(ImageView) view.findViewById(R.id.cameraimage);
+
             SendFilebtn.setOnClickListener(new View.OnClickListener() {
                   @Override
                   public void onClick(View v) {
@@ -458,6 +499,11 @@ public class ActionPageFragment extends Fragment {
             }
         }
 
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        softInputAssist.onDestroy();
+//    }
 
     public void setUser(long id) {
         this.userId = id;
