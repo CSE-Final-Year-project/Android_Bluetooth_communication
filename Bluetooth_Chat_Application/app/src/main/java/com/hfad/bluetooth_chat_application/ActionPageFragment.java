@@ -114,6 +114,7 @@ public class ActionPageFragment extends Fragment {
     private long userId;
     Bitmap mImageBitmap = null;
     ImageView imageView;
+    String[] mimetypes = {DOC,DOCX,XLS,TEXT,PDF,VIDEO,AUDIO};
     ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -153,7 +154,8 @@ public class ActionPageFragment extends Fragment {
 //                                File f=new File(imageUri.toString());
 //                                f.createNewFile();
                                 //write the bytes in file
-                                FileOutputStream fo = new FileOutputStream(createImageFile());
+                                File myfile=createImageFile();
+                                FileOutputStream fo = new FileOutputStream(myfile);
                                 fo.write(outStream.toByteArray());
                                 //deletting tthe overwritten file
                                 File fdelete = new File(imageUri.getPath());
@@ -166,6 +168,17 @@ public class ActionPageFragment extends Fragment {
                                 }
                                 // remember close de FileOutput
                                 fo.close();
+                                Uri photoUri=FileProvider.getUriForFile(getActivity(),BuildConfig.APPLICATION_ID+".provider",myfile);
+
+                                imageView.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Intent intent=new Intent(Intent.ACTION_VIEW);
+                                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                        intent.setDataAndType(photoUri,IMAGE);
+                                        startActivity(intent);
+                                    }
+                                });
 
                             }
                         } catch (FileNotFoundException e) {
@@ -208,11 +221,22 @@ public class ActionPageFragment extends Fragment {
 
                         Intent data = result.getData();
                         final Uri imageUri = data.getData();
+
                         final InputStream imageStream;
                         try {
                             imageStream = getActivity().getContentResolver().openInputStream(imageUri);
                             final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
                             imageView.setImageBitmap(selectedImage);
+                            imageView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                   // Uri photoUri=FileProvider.getUriForFile(getActivity(),BuildConfig.APPLICATION_ID+".provider",new File(imageUri.getPath()));
+                                    Intent intent=new Intent(Intent.ACTION_VIEW);
+                                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    intent.setDataAndType(imageUri,IMAGE);
+                                    startActivity(intent);
+                                }
+                            });
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
@@ -253,6 +277,9 @@ public class ActionPageFragment extends Fragment {
                          String filename=uri.getLastPathSegment();
                         Log.d(TAG,"File choosen is "+src);
                         Log.d(TAG,"The actual file name is "+source.getName());
+                        Intent intent=new Intent(Intent.ACTION_VIEW,uri);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        startActivity(intent);
 
                     }
                 }
@@ -436,7 +463,7 @@ public class ActionPageFragment extends Fragment {
         this.userId = id;
     }
     public void openFile(){
-        String[] mimetypes = {DOC,DOCX,XLS,TEXT,PDF,VIDEO,AUDIO};
+
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
       // intent.addCategory(Intent.CATEGORY_OPENABLE);
        //intent.putExtra("CONTENT_TYPE","*/*");
