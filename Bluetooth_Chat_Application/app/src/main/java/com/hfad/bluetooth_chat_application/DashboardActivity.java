@@ -243,6 +243,14 @@ public class DashboardActivity extends AppCompatActivity {
                              Log.d(TAG, "Incoming message: " + incomingMessage.substring(17)+" From "+bluetoothDevice.toString());
                              int notfication_number=0;
                              mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
+                             NotificationCompat.Builder builder=new NotificationCompat.Builder(DashboardActivity.this)
+                                     .setSmallIcon(R.drawable.messageicon)
+                                     .setContentTitle(user.getName()+": message")
+                                     .setContentText(incomingMessage.substring(17));
+                             builder.setNumber(++notfication_number);
+                             // Adding notification
+                             NotificationManager manager=(NotificationManager)DashboardActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                             manager.notify(0,builder.build());
                              if(receiverId==bluetoothDevice.toString()){
                                  LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
                                          LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -273,14 +281,7 @@ public class DashboardActivity extends AppCompatActivity {
                                  Incoming_text_view.setPadding(5, 3, 0, 50);
                                  Incoming_text_view.setTypeface(null, Typeface.ITALIC);
                                  Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
-                                 NotificationCompat.Builder builder=new NotificationCompat.Builder(DashboardActivity.this)
-                                         .setSmallIcon(R.drawable.messageicon)
-                                         .setContentTitle(user.getName()+": message")
-                                         .setContentText(incomingMessage.substring(17));
-                                 builder.setNumber(++notfication_number);
-                                 // Adding notification
-                                 NotificationManager manager=(NotificationManager)DashboardActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                                 manager.notify(0,builder.build());
+
                                  Incoming_text_view.setText(incomingMessage.substring(17));
                                  Toast.makeText(getApplicationContext() ,""+user.getName()+" has sent you a message!", Toast.LENGTH_SHORT).show();
                                  childLayout.addView(Incoming_text_view, 0);
