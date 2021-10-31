@@ -1,6 +1,9 @@
 package com.hfad.bluetooth_chat_application;
 
+import static androidx.core.app.NotificationCompat.*;
+
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
@@ -23,6 +26,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.utils.widget.ImageFilterView;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -96,7 +100,6 @@ public class ActionPageFragment extends Fragment {
     String TAG = "ActionPageFragment ";
     EditText send_data;
     TextView outgoing_text_view ;
-    TextView Incoming_text_view;
     String Busername;
     private Uri uriFilePath;
     StringBuilder messages;
@@ -454,48 +457,7 @@ public class ActionPageFragment extends Fragment {
                     SendMessage();
                 }
             });
-         while(DashboardActivity.incomingMessagesObjCopy.size()>0){
-             for(BluetoothDevice device:DashboardActivity.incomingMessagesObjCopy.keySet()){
-                 if(device==bluetoothDevice){
-                     LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
-                             LinearLayout.LayoutParams.WRAP_CONTENT,
-                             LinearLayout.LayoutParams.MATCH_PARENT);
-                            childLayout = new LinearLayout(getActivity());
-                            childLayout.setLayoutParams(linearParams);
-                            childLayout.setOrientation(LinearLayout.VERTICAL);
-                            linearParams.setMargins(10, 10, 10, 10);
 
-                            LinearLayout.LayoutParams comingmessageParams = new LinearLayout.LayoutParams(
-                                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT);
-                            comingmessageParams.width = 200;
-                            comingmessageParams.leftMargin = 5;
-                            comingmessageParams.rightMargin = 100;
-                            comingmessageParams.topMargin = 5;
-                            LinearLayout.LayoutParams yourmessageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT);
-                            comingmessageParams.width = 200;
-                            comingmessageParams.leftMargin = 70;
-
-                            comingmessageParams.rightMargin = 10;
-                            Incoming_text_view = new TextView(getActivity());
-
-                            Incoming_text_view.setLayoutParams(new TableLayout.LayoutParams(
-                                    comingmessageParams));
-                            Incoming_text_view.setBackground(getActivity().getDrawable(R.drawable.text_messages_shape));
-                            Incoming_text_view.setTextSize(16);
-                            Incoming_text_view.setPadding(5, 3, 0, 50);
-                            Incoming_text_view.setTypeface(null, Typeface.ITALIC);
-                            Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
-                            Incoming_text_view.setText(DashboardActivity.incomingMessagesObjCopy.get(device));
-                                Toast.makeText(getActivity(), ""+Busername+" has sent you a message!", Toast.LENGTH_SHORT).show();
-                                childLayout.addView(Incoming_text_view, 0);
-                                mylayout.addView(childLayout);
-                 }
-             }
-             DashboardActivity.incomingMessagesObjCopy.clear();
-
-         }
             }
         }
 
@@ -560,9 +522,12 @@ public class ActionPageFragment extends Fragment {
 //            if (!mainDirectory.exists())
 //                mainDirectory.mkdirs();
 //                Calendar calendar = Calendar.getInstance();
+            File myfile=createImageFile();
+            Log.d(TAG,"my file  has been created"+myfile.getPath());
 
            // uriFilePath = Uri.fromFile(new File(mainDirectory, "IMG_" + calendar.getTimeInMillis()));
-            uriFilePath = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", createImageFile());
+            uriFilePath = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", myfile);
+
             cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,  uriFilePath);
@@ -655,7 +620,7 @@ public class ActionPageFragment extends Fragment {
             childLayout.setLayoutParams(linearParams);
             childLayout.setOrientation(LinearLayout.VERTICAL);
             if (send_data.getText().length() > 0) {
-                byte[] bytes = send_data.getText().toString().getBytes(Charset.defaultCharset());
+                byte[] bytes = (bluetoothAdapter+send_data.getText().toString()).getBytes(Charset.defaultCharset());
                 outgoing_text_view = new TextView(getActivity());
                 LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,

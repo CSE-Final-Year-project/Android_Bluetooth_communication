@@ -2,10 +2,12 @@ package com.hfad.bluetooth_chat_application;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
@@ -38,6 +40,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,12 +59,14 @@ public class DashboardActivity extends AppCompatActivity {
     ActionPageFragment frag;
    public static ConnectedThread mConnectedThread;
    public static ConnectThread connectThread;
-   public static Map<BluetoothDevice,String> incomingMessagesObj=new HashMap<>();
-    public static Map<BluetoothDevice,String> incomingMessagesObjCopy=new HashMap<>();
     private UUID deviceUUID;
     BluetoothAdapter bluetoothAdapter;
     BluetoothDevice bluetoothDevice;
     private BluetoothDevice mmDevice;
+    LinearLayout childLayout;
+    LinearLayout mylayout;
+    TextView Incoming_text_view;
+    User user;
     ArrayList<User> arrayOfUsers;
     private static final UUID MY_UUID_INSECURE=UUID.fromString("a1682af1-f7e0-49ec-b977-b93856cf5b79");
     String TAG="DashboardActivity";
@@ -74,7 +79,7 @@ public class DashboardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityCompat.requestPermissions(this,new String[]{
-                Manifest.permission.CAMERA,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},MY_CAMERA_PERMISSION_CODE);
+                Manifest.permission.CAMERA,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.MANAGE_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},MY_CAMERA_PERMISSION_CODE);
         bluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
         setContentView(R.layout.dashbord1_activity);
          Toolbar mytoolbar = (Toolbar) findViewById(R.id.actiontoolbar);
@@ -90,14 +95,18 @@ public class DashboardActivity extends AppCompatActivity {
         frag.setUser(UserId);
         //softInputAssist = new SoftInputAssist(this);
         arrayOfUsers = dashboardListFragment.arrayOfUsers;
-        User user = arrayOfUsers.get((int) UserId);
+         user = arrayOfUsers.get((int) UserId);
         bluetoothDevice = dashboardListFragment.PairedList.get(user.getName());
         Log.d("devicename:", user.getName());
         Log.d("device: ", "" + bluetoothDevice);
         Log.d(TAG,""+MY_UUID_INSECURE);
         Start_Server();
-        DashboardActivity.connectThread = new DashboardActivity.ConnectThread(bluetoothDevice, MY_UUID_INSECURE);
-        DashboardActivity.connectThread.start();
+       for (BluetoothDevice mybluetoothDevice:dashboardListFragment.PairedList.values()) {
+            Log.d("Device ", "" + mybluetoothDevice);
+            DashboardActivity.connectThread = new DashboardActivity.ConnectThread(mybluetoothDevice, MY_UUID_INSECURE);
+            DashboardActivity.connectThread.start();
+
+    }
     }
 
     @Override
@@ -229,12 +238,60 @@ public class DashboardActivity extends AppCompatActivity {
                          public void run() {
                              // Log.d(TAG,"BUSER: "+Busername+"\n bluetooth name :"+bluetoothDevice.getName());
                              // if(Busername.equals(bluetoothDevice.getName())){
-                             Log.d(TAG, "Incoming message: " + incomingMessage+" From "+bluetoothDevice);
-                             incomingMessagesObj.put(bluetoothDevice,incomingMessage);
-                             incomingMessagesObjCopy.put(bluetoothDevice,incomingMessage);
+                             String receiverId=incomingMessage.substring(0,17);
+                             Log.d("Receiver:",receiverId);
+                             Log.d(TAG, "Incoming message: " + incomingMessage.substring(17)+" From "+bluetoothDevice.toString());
+                             int notfication_number=0;
+                             mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
+                             if(receiverId==bluetoothDevice.toString()){
+                                 LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
+                                         LinearLayout.LayoutParams.WRAP_CONTENT,
+                                         LinearLayout.LayoutParams.MATCH_PARENT);
+                                 childLayout = new LinearLayout(DashboardActivity.this);
+                                 childLayout.setLayoutParams(linearParams);
+                                 childLayout.setOrientation(LinearLayout.VERTICAL);
+                                 linearParams.setMargins(10, 10, 10, 10);
 
+                                 LinearLayout.LayoutParams comingmessageParams = new LinearLayout.LayoutParams(
+                                         LinearLayout.LayoutParams.WRAP_CONTENT,
+                                         LinearLayout.LayoutParams.WRAP_CONTENT);
+                                 comingmessageParams.width = 200;
+                                 comingmessageParams.leftMargin = 5;
+                                 comingmessageParams.rightMargin = 100;
+                                 comingmessageParams.topMargin = 5;
+                                 LinearLayout.LayoutParams yourmessageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                         LinearLayout.LayoutParams.WRAP_CONTENT);
+                                 comingmessageParams.width = 200;
+                                 comingmessageParams.leftMargin = 70;
+
+                                 comingmessageParams.rightMargin = 10;
+                                 Incoming_text_view = new TextView(DashboardActivity.this);
+                                 Incoming_text_view.setLayoutParams(new TableLayout.LayoutParams(
+                                         comingmessageParams));
+                                 Incoming_text_view.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
+                                 Incoming_text_view.setTextSize(16);
+                                 Incoming_text_view.setPadding(5, 3, 0, 50);
+                                 Incoming_text_view.setTypeface(null, Typeface.ITALIC);
+                                 Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
+                                 NotificationCompat.Builder builder=new NotificationCompat.Builder(DashboardActivity.this)
+                                         .setSmallIcon(R.drawable.messageicon)
+                                         .setContentTitle(user.getName()+": message")
+                                         .setContentText(incomingMessage.substring(17));
+                                 builder.setNumber(++notfication_number);
+                                 // Adding notification
+                                 NotificationManager manager=(NotificationManager)DashboardActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                 manager.notify(0,builder.build());
+                                 Incoming_text_view.setText(incomingMessage.substring(17));
+                                 Toast.makeText(getApplicationContext() ,""+user.getName()+" has sent you a message!", Toast.LENGTH_SHORT).show();
+                                 childLayout.addView(Incoming_text_view, 0);
+                                 mylayout.addView(childLayout);
+
+                     }
                          }
                      });
+//                    while(DashboardActivity.incomingMessagesObjCopy.size()>0){
+
+
 
 
                  } catch (IOException e) {
