@@ -29,6 +29,7 @@ import java.util.Map;
 * listfragment view to open the correspondent action page fragment view */
 public class Dashboard_Main extends AppCompatActivity implements Dashboard_ListFragment.Listener {
 
+    public static Dashboard_Main dashboard_main;
     private static final int REQUEST_DISCOVERY = 1;
     private static final int REQUEST_ENABLE =1 ;
     Map<String, String> PairedList = new HashMap<String, String>();
@@ -55,8 +56,8 @@ public class Dashboard_Main extends AppCompatActivity implements Dashboard_ListF
         setContentView(R.layout.activity_dashboard);
         Toolbar mytoolbar = (Toolbar) findViewById(R.id.dashtool);
         setSupportActionBar(mytoolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.setDisplayHomeAsUpEnabled(true);
 
         int MY_PERMISSIOMS_REQUEST_ACCESS_COARSE_LOCATION=1;
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.BLUETOOTH,Manifest.permission.BLUETOOTH_ADMIN},MY_PERMISSIOMS_REQUEST_ACCESS_COARSE_LOCATION);

@@ -2,6 +2,7 @@ package com.hfad.bluetooth_chat_application;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -67,11 +69,13 @@ public class DashboardActivity extends AppCompatActivity {
     LinearLayout mylayout;
     TextView Incoming_text_view;
     User user;
+    Toolbar mytoolbar;
     ArrayList<User> arrayOfUsers;
     private static final UUID MY_UUID_INSECURE=UUID.fromString("a1682af1-f7e0-49ec-b977-b93856cf5b79");
     String TAG="DashboardActivity";
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
     public static final String EXTRA_USER_ID = "Id";
+    public static final String notifcationId="b93856cf5b79";
     Set<BluetoothDevice> pairedDevices=MainActivity.pairedDevices;
     SoftInputAssist softInputAssist;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -79,14 +83,15 @@ public class DashboardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityCompat.requestPermissions(this,new String[]{
-                Manifest.permission.CAMERA,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.MANAGE_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},MY_CAMERA_PERMISSION_CODE);
+                Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.MANAGE_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},MY_CAMERA_PERMISSION_CODE);
         bluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
         setContentView(R.layout.dashbord1_activity);
-         Toolbar mytoolbar = (Toolbar) findViewById(R.id.actiontoolbar);
+          mytoolbar = (Toolbar) findViewById(R.id.actiontoolbar);
          setSupportActionBar(mytoolbar);
        ActionBar actionBar = getSupportActionBar();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
        actionBar.setDisplayHomeAsUpEnabled(true);
+        createNotificationChannel();
 
          frag = (ActionPageFragment)
                 getSupportFragmentManager().findFragmentById(R.id.detail_frag);
@@ -101,12 +106,13 @@ public class DashboardActivity extends AppCompatActivity {
         Log.d("device: ", "" + bluetoothDevice);
         Log.d(TAG,""+MY_UUID_INSECURE);
         Start_Server();
+        DashboardActivity.connectThread = new DashboardActivity.ConnectThread(bluetoothDevice, MY_UUID_INSECURE);
        for (BluetoothDevice mybluetoothDevice:dashboardListFragment.PairedList.values()) {
             Log.d("Device ", "" + mybluetoothDevice);
-            DashboardActivity.connectThread = new DashboardActivity.ConnectThread(mybluetoothDevice, MY_UUID_INSECURE);
-            DashboardActivity.connectThread.start();
-
+            //if (mybluetoothDevice!=bluetoothDevice)
+           //DashboardActivity.connectThread = new DashboardActivity.ConnectThread(mybluetoothDevice, MY_UUID_INSECURE);
     }
+        DashboardActivity.connectThread.start();
     }
 
     @Override
@@ -118,6 +124,8 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+//            case android.R.id.home:
+//                DashboardActivity.this.finish();
             case R.id.action_settings:  {
                 // navigate to settings screen
                 return true;
@@ -194,6 +202,21 @@ public class DashboardActivity extends AppCompatActivity {
         mConnectedThread = new DashboardActivity.ConnectedThread(mmSocket);
         mConnectedThread.start();
     }
+    private void createNotificationChannel(){
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            CharSequence name=getString(R.string.chanel_name);
+            String description=getString(R.string.chanel_description);
+            int importance=NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel chanel=new NotificationChannel(notifcationId,name,importance);
+            chanel.setDescription(description);
+            NotificationManager notificationManager=getSystemService(NotificationManager.class);
+            chanel.enableLights(true);
+            chanel.enableVibration(true);
+            chanel.setVibrationPattern(new long[]{100,200,300,400,500,400,300,200,400});
+            notificationManager.createNotificationChannel(chanel);
+
+        }
+    }
 
      class ConnectedThread extends Thread {
          private final BluetoothSocket mmSocket;
@@ -240,18 +263,8 @@ public class DashboardActivity extends AppCompatActivity {
                              // if(Busername.equals(bluetoothDevice.getName())){
                              String receiverId=incomingMessage.substring(0,17);
                              Log.d("Receiver:",receiverId);
-                             Log.d(TAG, "Incoming message: " + incomingMessage.substring(17)+" From "+bluetoothDevice.toString());
-                             int notfication_number=0;
-                             mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
-                             NotificationCompat.Builder builder=new NotificationCompat.Builder(DashboardActivity.this)
-                                     .setSmallIcon(R.drawable.messageicon)
-                                     .setContentTitle(user.getName()+": message")
-                                     .setContentText(incomingMessage.substring(17));
-                             builder.setNumber(++notfication_number);
-                             // Adding notification
-                             NotificationManager manager=(NotificationManager)DashboardActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                             manager.notify(0,builder.build());
-                             if(receiverId==bluetoothDevice.toString()){
+                             Log.d(TAG,"new coming message: "+incomingMessage.substring(17));
+                             if(receiverId==bluetoothDevice.getName()){
                                  LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
                                          LinearLayout.LayoutParams.WRAP_CONTENT,
                                          LinearLayout.LayoutParams.MATCH_PARENT);
@@ -288,6 +301,20 @@ public class DashboardActivity extends AppCompatActivity {
                                  mylayout.addView(childLayout);
 
                      }
+                             Log.d(TAG, "Incoming message: " + incomingMessage.substring(17)+" From "+bluetoothDevice.toString());
+                             int notfication_number=0;
+                             mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
+                             Log.d("current id",bluetoothDevice.getName());
+                             NotificationCompat.Builder builder=new NotificationCompat.Builder(DashboardActivity.this,notifcationId)
+                                     .setSmallIcon(R.drawable.messageicon)
+                                     .setContentTitle(user.getName()+": message")
+                                     .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                     .setStyle(new NotificationCompat.BigTextStyle().bigText(incomingMessage.substring(17)))
+                                     .setContentText("Incoming message");
+                             builder.setNumber(++notfication_number);
+                             // Adding notification
+                             NotificationManager manager=(NotificationManager)DashboardActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                             manager.notify(0,builder.build());
                          }
                      });
 //                    while(DashboardActivity.incomingMessagesObjCopy.size()>0){

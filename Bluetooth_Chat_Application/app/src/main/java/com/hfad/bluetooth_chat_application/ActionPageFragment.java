@@ -2,10 +2,12 @@ package com.hfad.bluetooth_chat_application;
 
 import static androidx.core.app.NotificationCompat.*;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -26,6 +28,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.utils.widget.ImageFilterView;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
@@ -43,6 +46,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -365,6 +369,7 @@ public class ActionPageFragment extends Fragment {
                 uriFilePath = Uri.parse(savedInstanceState.getString("uri_file_path"));
         }
             softInputAssist=new SoftInputAssist(getActivity());
+            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
 
     }
@@ -415,6 +420,7 @@ public class ActionPageFragment extends Fragment {
                               }
                           });
                           cameraImageview.setOnClickListener(new View.OnClickListener() {
+                              @RequiresApi(api = Build.VERSION_CODES.M)
                               @Override
                               public void onClick(View v) {
                                   try {
@@ -514,24 +520,36 @@ public class ActionPageFragment extends Fragment {
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
     }
-    public void captureImage() throws IOException {
+    private void LunchCamera() throws IOException {
         Intent cameraIntent = new Intent();
+        File myfile=createImageFile();
+        Log.d(TAG,"my file  has been created"+myfile.getPath());
+
+        // uriFilePath = Uri.fromFile(new File(mainDirectory, "IMG_" + calendar.getTimeInMillis()));
+        uriFilePath = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", myfile);
+
+        cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,  uriFilePath);
+        activityResultLauncher.launch(cameraIntent);
+    }
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void captureImage() throws IOException {
+
         PackageManager packageManager = getActivity().getPackageManager();
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+            if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.CAMERA},100);
+                LunchCamera();
+            }
+            else
+                LunchCamera();
+
 //            File mainDirectory = new File(Environment.getExternalStorageDirectory(), "MyFolder/tmp");
 //            if (!mainDirectory.exists())
 //                mainDirectory.mkdirs();
 //                Calendar calendar = Calendar.getInstance();
-            File myfile=createImageFile();
-            Log.d(TAG,"my file  has been created"+myfile.getPath());
 
-           // uriFilePath = Uri.fromFile(new File(mainDirectory, "IMG_" + calendar.getTimeInMillis()));
-            uriFilePath = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", myfile);
-
-            cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,  uriFilePath);
-            activityResultLauncher.launch(cameraIntent);
 
         }
     }
@@ -620,7 +638,7 @@ public class ActionPageFragment extends Fragment {
             childLayout.setLayoutParams(linearParams);
             childLayout.setOrientation(LinearLayout.VERTICAL);
             if (send_data.getText().length() > 0) {
-                byte[] bytes = (bluetoothAdapter+send_data.getText().toString()).getBytes(Charset.defaultCharset());
+                byte[] bytes = (bluetoothDevice.getName()+send_data.getText().toString()).getBytes(Charset.defaultCharset());
                 outgoing_text_view = new TextView(getActivity());
                 LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -721,5 +739,12 @@ public class ActionPageFragment extends Fragment {
 
     }
 
-
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                getActivity().finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
