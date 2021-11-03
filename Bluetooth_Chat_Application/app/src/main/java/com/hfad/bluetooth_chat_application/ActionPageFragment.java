@@ -69,6 +69,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -390,6 +391,7 @@ public class ActionPageFragment extends Fragment {
         super.onStart();
         view = getView();
         arrayOfUsers = dashboardListFragment.arrayOfUsers;
+        Log.d(TAG,"this is my address: "+getBluetoothMacAddress());
         if (view != null) {
               Button SendFilebtn=(Button)view.findViewById(R.id.attachFilebutton);
             //imageView=(ImageView) view.findViewById(R.id.cameraimage);
@@ -476,6 +478,24 @@ public class ActionPageFragment extends Fragment {
     public void setUser(long id) {
         this.userId = id;
     }
+    private String getBluetoothMacAddress() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        String bluetoothMacAddress = "";
+        try {
+            Field mServiceField = bluetoothAdapter.getClass().getDeclaredField("mService");
+            mServiceField.setAccessible(true);
+
+            Object btManagerService = mServiceField.get(bluetoothAdapter);
+
+            if (btManagerService != null) {
+                bluetoothMacAddress = (String) btManagerService.getClass().getMethod("getAddress").invoke(btManagerService);
+            }
+        } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignore) {
+
+        }
+        return bluetoothMacAddress;
+    }
+
     public void openFile(){
 
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -638,7 +658,7 @@ public class ActionPageFragment extends Fragment {
             childLayout.setLayoutParams(linearParams);
             childLayout.setOrientation(LinearLayout.VERTICAL);
             if (send_data.getText().length() > 0) {
-                byte[] bytes = (bluetoothDevice.getName()+send_data.getText().toString()).getBytes(Charset.defaultCharset());
+                byte[] bytes = (getBluetoothMacAddress()+send_data.getText().toString()).getBytes(Charset.defaultCharset());
                 outgoing_text_view = new TextView(getActivity());
                 LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
