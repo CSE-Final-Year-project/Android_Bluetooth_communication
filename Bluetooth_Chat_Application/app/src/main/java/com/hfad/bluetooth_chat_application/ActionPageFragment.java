@@ -369,7 +369,7 @@ public class ActionPageFragment extends Fragment {
             if (uriFilePath == null && savedInstanceState.getString("uri_file_path") != null) {
                 uriFilePath = Uri.parse(savedInstanceState.getString("uri_file_path"));
         }
-            softInputAssist=new SoftInputAssist(getActivity());
+           // softInputAssist=new SoftInputAssist(getActivity());
             getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
 
@@ -657,8 +657,11 @@ public class ActionPageFragment extends Fragment {
             childLayout = new LinearLayout(getActivity());
             childLayout.setLayoutParams(linearParams);
             childLayout.setOrientation(LinearLayout.VERTICAL);
+            String macAddress=getBluetoothMacAddress();
+            Log.d(TAG,"This is my mac: "+macAddress);
             if (send_data.getText().length() > 0) {
-                byte[] bytes = (getBluetoothMacAddress()+send_data.getText().toString()).getBytes(Charset.defaultCharset());
+
+                byte[] bytes = (macAddress+send_data.getText().toString()).getBytes(Charset.defaultCharset());
                 outgoing_text_view = new TextView(getActivity());
                 LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,

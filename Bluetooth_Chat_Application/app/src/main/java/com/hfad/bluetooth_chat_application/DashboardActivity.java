@@ -261,10 +261,14 @@ public class DashboardActivity extends AppCompatActivity {
                          public void run() {
                              // Log.d(TAG,"BUSER: "+Busername+"\n bluetooth name :"+bluetoothDevice.getName());
                              // if(Busername.equals(bluetoothDevice.getName())){
+                             Log.d(TAG,"Incoming message is :"+incomingMessage);
                              String receiverId=incomingMessage.substring(0,17);
                              Log.d("Receiver:",receiverId);
                              Log.d(TAG,"new coming message: "+incomingMessage.substring(17));
-                             if(receiverId==bluetoothDevice.getName()){
+                               Log.d(TAG,"are they equal?"+(receiverId==bluetoothDevice.getAddress()));
+                              mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
+                             if(receiverId.equalsIgnoreCase(bluetoothDevice.getAddress())){
+                                 Log.d(TAG,"sent: "+receiverId+" , received: "+bluetoothDevice.getAddress());
                                  LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
                                          LinearLayout.LayoutParams.WRAP_CONTENT,
                                          LinearLayout.LayoutParams.MATCH_PARENT);
@@ -303,7 +307,6 @@ public class DashboardActivity extends AppCompatActivity {
                      }
                              Log.d(TAG, "Incoming message: " + incomingMessage.substring(17)+" From "+bluetoothDevice.toString());
                              int notfication_number=0;
-                             mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
                              Log.d("current id",bluetoothDevice.getName());
                              NotificationCompat.Builder builder=new NotificationCompat.Builder(DashboardActivity.this,notifcationId)
                                      .setSmallIcon(R.drawable.messageicon)
