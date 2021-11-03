@@ -679,7 +679,9 @@ public class ActionPageFragment extends Fragment {
                 //childLayout.removeView(outgoing_text_view);
                 mylayout.addView(childLayout);
                 send_data.getText().clear();
-                new DashboardActivity().mConnectedThread.write(bytes);
+                DashboardActivity dashboardActivity=new DashboardActivity();
+                if(dashboardActivity.mConnectedThread!=null)
+                    dashboardActivity.mConnectedThread.write(bytes);
             } else {
                 send_data.setError("Message should not be empty!");
             }

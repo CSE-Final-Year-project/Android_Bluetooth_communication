@@ -339,6 +339,7 @@ public class DashboardActivity extends AppCompatActivity {
              String text = new String(bytes, Charset.defaultCharset());
              Log.d(TAG, "write: Writing to outputstream: " + text);
              try {
+                 if(mmOutStream!=null)
                  mmOutStream.write(bytes);
                  mmOutStream.flush();
              } catch (IOException e) {
