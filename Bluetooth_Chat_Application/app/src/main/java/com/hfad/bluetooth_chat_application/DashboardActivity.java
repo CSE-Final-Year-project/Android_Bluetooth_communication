@@ -261,63 +261,68 @@ public class DashboardActivity extends AppCompatActivity {
                          public void run() {
                              // Log.d(TAG,"BUSER: "+Busername+"\n bluetooth name :"+bluetoothDevice.getName());
                              // if(Busername.equals(bluetoothDevice.getName())){
-                             Log.d(TAG,"Incoming message is :"+incomingMessage);
-                             String receiverId=incomingMessage.substring(0,17);
-                             Log.d("Receiver:",receiverId);
-                             Log.d(TAG,"new coming message: "+incomingMessage.substring(17));
-                               Log.d(TAG,"are they equal?"+(receiverId==bluetoothDevice.getAddress()));
-                              mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
-                             if(receiverId.equalsIgnoreCase(bluetoothDevice.getAddress())){
-                                 Log.d(TAG,"sent: "+receiverId+" , received: "+bluetoothDevice.getAddress());
-                                 LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
-                                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                                         LinearLayout.LayoutParams.MATCH_PARENT);
-                                 childLayout = new LinearLayout(DashboardActivity.this);
-                                 childLayout.setLayoutParams(linearParams);
-                                 childLayout.setOrientation(LinearLayout.VERTICAL);
-                                 linearParams.setMargins(10, 10, 10, 10);
+                             Log.d(TAG, "Bluetooth uuid id" + bluetoothDevice.getUuids()[0].toString());
+                             Log.d(TAG, "Incoming message is :" + incomingMessage);
+                             String IdentifiedId = bluetoothDevice.getName() + bluetoothAdapter.getName();
+                             int IdLength = IdentifiedId.length();
+                             if (incomingMessage.length() > IdLength) {
+                                 String receiverId = incomingMessage.substring(0, IdLength);
+                                 Log.d("Receiver:", receiverId);
+                                 Log.d(TAG, "new coming message: " + incomingMessage.substring(IdLength));
+                                 Log.d(TAG, "are they equal?" + (receiverId == bluetoothDevice.getAddress()));
+                                 mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
+                                 if (receiverId.equalsIgnoreCase(IdentifiedId)) {
+                                     Log.d(TAG, "sent: " + receiverId + " , received: " + bluetoothDevice.getAddress());
+                                     LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
+                                             LinearLayout.LayoutParams.WRAP_CONTENT,
+                                             LinearLayout.LayoutParams.MATCH_PARENT);
+                                     childLayout = new LinearLayout(DashboardActivity.this);
+                                     childLayout.setLayoutParams(linearParams);
+                                     childLayout.setOrientation(LinearLayout.VERTICAL);
+                                     linearParams.setMargins(10, 10, 10, 10);
 
-                                 LinearLayout.LayoutParams comingmessageParams = new LinearLayout.LayoutParams(
-                                         LinearLayout.LayoutParams.WRAP_CONTENT,
-                                         LinearLayout.LayoutParams.WRAP_CONTENT);
-                                 comingmessageParams.width = 200;
-                                 comingmessageParams.leftMargin = 5;
-                                 comingmessageParams.rightMargin = 100;
-                                 comingmessageParams.topMargin = 5;
-                                 LinearLayout.LayoutParams yourmessageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                                         LinearLayout.LayoutParams.WRAP_CONTENT);
-                                 comingmessageParams.width = 200;
-                                 comingmessageParams.leftMargin = 70;
+                                     LinearLayout.LayoutParams comingmessageParams = new LinearLayout.LayoutParams(
+                                             LinearLayout.LayoutParams.WRAP_CONTENT,
+                                             LinearLayout.LayoutParams.WRAP_CONTENT);
+                                     comingmessageParams.width = 200;
+                                     comingmessageParams.leftMargin = 5;
+                                     comingmessageParams.rightMargin = 100;
+                                     comingmessageParams.topMargin = 5;
+                                     LinearLayout.LayoutParams yourmessageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                             LinearLayout.LayoutParams.WRAP_CONTENT);
+                                     comingmessageParams.width = 200;
+                                     comingmessageParams.leftMargin = 70;
 
-                                 comingmessageParams.rightMargin = 10;
-                                 Incoming_text_view = new TextView(DashboardActivity.this);
-                                 Incoming_text_view.setLayoutParams(new TableLayout.LayoutParams(
-                                         comingmessageParams));
-                                 Incoming_text_view.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
-                                 Incoming_text_view.setTextSize(16);
-                                 Incoming_text_view.setPadding(5, 3, 0, 50);
-                                 Incoming_text_view.setTypeface(null, Typeface.ITALIC);
-                                 Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
+                                     comingmessageParams.rightMargin = 10;
+                                     Incoming_text_view = new TextView(DashboardActivity.this);
+                                     Incoming_text_view.setLayoutParams(new TableLayout.LayoutParams(
+                                             comingmessageParams));
+                                     Incoming_text_view.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
+                                     Incoming_text_view.setTextSize(16);
+                                     Incoming_text_view.setPadding(5, 3, 0, 50);
+                                     Incoming_text_view.setTypeface(null, Typeface.ITALIC);
+                                     Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
 
-                                 Incoming_text_view.setText(incomingMessage.substring(17));
-                                 Toast.makeText(getApplicationContext() ,""+user.getName()+" has sent you a message!", Toast.LENGTH_SHORT).show();
-                                 childLayout.addView(Incoming_text_view, 0);
-                                 mylayout.addView(childLayout);
+                                     Incoming_text_view.setText(incomingMessage.substring(IdLength));
+                                     Toast.makeText(getApplicationContext(), "" + user.getName() + " has sent you a message!", Toast.LENGTH_SHORT).show();
+                                     childLayout.addView(Incoming_text_view, 0);
+                                     mylayout.addView(childLayout);
 
-                     }
-                             Log.d(TAG, "Incoming message: " + incomingMessage.substring(17)+" From "+bluetoothDevice.toString());
-                             int notfication_number=0;
-                             Log.d("current id",bluetoothDevice.getName());
-                             NotificationCompat.Builder builder=new NotificationCompat.Builder(DashboardActivity.this,notifcationId)
-                                     .setSmallIcon(R.drawable.messageicon)
-                                     .setContentTitle(user.getName()+": message")
-                                     .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                     .setStyle(new NotificationCompat.BigTextStyle().bigText(incomingMessage.substring(17)))
-                                     .setContentText("Incoming message");
-                             builder.setNumber(++notfication_number);
-                             // Adding notification
-                             NotificationManager manager=(NotificationManager)DashboardActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                             manager.notify(0,builder.build());
+                                 }
+                                 Log.d(TAG, "Incoming message: " + incomingMessage.substring(IdLength) + " From " + bluetoothDevice.toString());
+                                 int notfication_number = 0;
+                                 Log.d("current id", bluetoothDevice.getName());
+                                 NotificationCompat.Builder builder = new NotificationCompat.Builder(DashboardActivity.this, notifcationId)
+                                         .setSmallIcon(R.drawable.messageicon)
+                                         .setContentTitle(user.getName() + ": message")
+                                         .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                         .setStyle(new NotificationCompat.BigTextStyle().bigText(incomingMessage.substring(IdLength)))
+                                         .setContentText("Incoming message");
+                                 builder.setNumber(++notfication_number);
+                                 // Adding notification
+                                 NotificationManager manager = (NotificationManager) DashboardActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                 manager.notify(0, builder.build());
+                             }
                          }
                      });
 //                    while(DashboardActivity.incomingMessagesObjCopy.size()>0){
@@ -399,7 +404,6 @@ public class DashboardActivity extends AppCompatActivity {
             Log.i(TAG, "END mAcceptThread ");
         }
 
-
         /* Call this from the main activity to shutdown the connection */
 
     }
@@ -407,7 +411,6 @@ public class DashboardActivity extends AppCompatActivity {
 
              AcceptThread accept = new AcceptThread();
              accept.start();
-
     }
     @Override
     protected void onDestroy() {

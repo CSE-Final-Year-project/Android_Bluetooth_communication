@@ -474,6 +474,34 @@ public class ActionPageFragment extends Fragment {
 //        super.onDestroy();
 //        softInputAssist.onDestroy();
 //    }
+    private String getDeviceUUID(){
+        String myUuid="";
+        String TotalUuid="";
+        try{
+            Method getUuidsMethod=BluetoothAdapter.class.getDeclaredMethod("getUuids",null);
+            ParcelUuid[] uuids=(ParcelUuid[]) getUuidsMethod.invoke(bluetoothAdapter,null);
+            if(uuids!=null){
+                for(ParcelUuid uuid:uuids){
+                   TotalUuid+=uuid;
+                    Log.d(TAG,"UUId: "+uuid);
+                }
+                myUuid=((uuids[0]).getUuid()).toString();
+                Log.d(TAG,"UUID length: "+myUuid.length());
+                Log.d(TAG,"TotalUUid is: "+TotalUuid+" with the length: "+TotalUuid.length());
+
+            }
+            else
+                Log.d(TAG,"No UUID found! ");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return myUuid;
+
+    }
 
     public void setUser(long id) {
         this.userId = id;
@@ -481,6 +509,7 @@ public class ActionPageFragment extends Fragment {
     private String getBluetoothMacAddress() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         String bluetoothMacAddress = "";
+        Log.d(TAG,"my Uuid is :"+getDeviceUUID());
         try {
             Field mServiceField = bluetoothAdapter.getClass().getDeclaredField("mService");
             mServiceField.setAccessible(true);
@@ -493,6 +522,7 @@ public class ActionPageFragment extends Fragment {
         } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignore) {
 
         }
+
         return bluetoothMacAddress;
     }
 
@@ -647,7 +677,11 @@ public class ActionPageFragment extends Fragment {
 //        }
 
    // }
+private String GetIdentifiedId(){
+        String usedId=bluetoothAdapter.getName()+Busername;
+        return usedId;
 
+}
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void SendMessage() {
@@ -660,8 +694,8 @@ public class ActionPageFragment extends Fragment {
             String macAddress=getBluetoothMacAddress();
             Log.d(TAG,"This is my mac: "+macAddress);
             if (send_data.getText().length() > 0) {
-
-                byte[] bytes = (macAddress+send_data.getText().toString()).getBytes(Charset.defaultCharset());
+                Log.d(TAG,"my address:"+bluetoothDevice.getAddress());
+                byte[] bytes = (GetIdentifiedId()+send_data.getText().toString()).getBytes(Charset.defaultCharset());
                 outgoing_text_view = new TextView(getActivity());
                 LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -669,6 +703,7 @@ public class ActionPageFragment extends Fragment {
                 outgoing_msg_params.width = 200;
                 outgoing_msg_params.leftMargin = 180;
                 outgoing_msg_params.topMargin = 5;
+                outgoing_msg_params.bottomMargin=2;
                 outgoing_msg_params.rightMargin = 10;
                 outgoing_text_view.setLayoutParams(new TableLayout.LayoutParams(
                         outgoing_msg_params));
