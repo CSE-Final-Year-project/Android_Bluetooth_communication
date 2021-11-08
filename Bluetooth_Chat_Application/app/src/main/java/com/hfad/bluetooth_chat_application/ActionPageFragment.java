@@ -58,6 +58,7 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -68,7 +69,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -77,8 +81,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.text.BreakIterator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -87,7 +94,7 @@ import java.util.Map;
 import java.util.UUID;
 
 // This is the class fragment that shows the view of our action page
-public class ActionPageFragment extends Fragment {
+public class ActionPageFragment extends Fragment implements Serializable {
     public static ArrayList<User> arrayOfUsers = new ArrayList<User>();
     private static final UUID MY_UUID_INSECURE=UUID.fromString("a1682af1-f7e0-49ec-b977-b93856cf5b79");
     private UUID deviceUUID;
@@ -124,6 +131,9 @@ public class ActionPageFragment extends Fragment {
     Bitmap mImageBitmap = null;
    // ImageView imageView;
    private SoftInputAssist softInputAssist;
+   private MessageClass messageClass;
+   private StringMessage stringMessage;
+   private ImageMessage imageMessage;
     String[] mimetypes = {DOC,DOCX,XLS,TEXT,PDF,VIDEO,AUDIO};
     ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
@@ -160,7 +170,7 @@ public class ActionPageFragment extends Fragment {
                                 ByteArrayOutputStream outStream = new ByteArrayOutputStream();
                                 // compress to the format you want, JPEG, PNG...
                                 // 70 is the 0-100 quality percentage
-                                b2.compress(Bitmap.CompressFormat.JPEG, 70, outStream);
+                                b2.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
                                 // we save the file, at least until we have made use of it
 //                                File f = new File(Environment.getExternalStorageDirectory()
 //                                        + File.separator + "test.jpg");
@@ -170,6 +180,11 @@ public class ActionPageFragment extends Fragment {
                                 File myfile=createImageFile();
                                 FileOutputStream fo = new FileOutputStream(myfile);
                                 fo.write(outStream.toByteArray());
+                                byte[] imagebytes=outStream.toByteArray();
+                                String messageType="Image";
+                                messageClass=new ImageMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),myfile.getName(),myfile,imagebytes);
+                                DashboardActivity.mConnectedThread.write(messageClass);
+
                                 //deletting tthe overwritten file
                                 File fdelete = new File(imageUri.getPath());
                                 if (fdelete.exists()) {
@@ -270,6 +285,16 @@ public class ActionPageFragment extends Fragment {
                                 NewImageView.setForegroundGravity(Gravity.LEFT | Gravity.CENTER);
                                 NewImageView.setImageBitmap(selectedImage);
                                 mylayout.addView(NewImageView);
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                byte[] imageToSend=encodeToBase64(selectedImage, Bitmap.CompressFormat.JPEG,100);
+                                String messageType="Image";
+                                String selectedPath = imageUri.getPath();
+                                File f = new File(selectedPath);
+                                messageClass=new ImageMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),f.getName(),f,imageToSend);
+                                DashboardActivity.mConnectedThread.write(messageClass);
+
+                            }
+
                             NewImageView.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -284,21 +309,7 @@ public class ActionPageFragment extends Fragment {
                             e.printStackTrace();
                         }
 
-//                        Uri uri=data.getData();
-//                        String src=uri.getPath();
-//                        src = src.replaceAll(" ", "%20");
-//                        File source=new File(src);
-//                        try {
-//                            Bitmap bitmap= MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
-//                            imageView.setImageBitmap(bitmap);
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-
-
-                       // String filename=uri.getLastPathSegment();
-//                        Log.d(TAG,"File choosen is "+src);
-//                        Log.d(TAG,"The actual file name is "+source.getName());
+//
 
                     }
                     }
@@ -551,7 +562,7 @@ public class ActionPageFragment extends Fragment {
       image_ActivityResultLauncher.launch(intent);
     }
 
-    private File createImageFile() throws IOException {
+    public File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "IMAGE_" + timeStamp + "_";
@@ -588,95 +599,14 @@ public class ActionPageFragment extends Fragment {
 
         PackageManager packageManager = getActivity().getPackageManager();
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)!=PackageManager.PERMISSION_GRANTED){
-                ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.CAMERA},100);
+            if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, 100);
                 LunchCamera();
-            }
-            else
+            } else
                 LunchCamera();
-
-//            File mainDirectory = new File(Environment.getExternalStorageDirectory(), "MyFolder/tmp");
-//            if (!mainDirectory.exists())
-//                mainDirectory.mkdirs();
-//                Calendar calendar = Calendar.getInstance();
-
-
         }
     }
 
-//    public String getPath(Uri uri){
-//
-//    }
-
-
-//    private void connected(BluetoothSocket mmSocket) {
-//        Log.d(TAG, "connected: Starting.");
-//
-//        // Start the thread to manage the connection and perform transmissions
-//        mConnectedThread = new ConnectedThread(mmSocket);
-//        mConnectedThread.start();
-//    }
-
-//    private class ConnectedThread extends Thread {
-//        private final BluetoothSocket mmSocket;
-//        private final InputStream mmInStream;
-//        private final OutputStream mmOutStream;
-//
-//        public ConnectedThread(BluetoothSocket socket) {
-//            Log.d(TAG, "ConnectedThread: Starting.");
-//
-//            mmSocket = socket;
-//            InputStream tmpIn = null;
-//            OutputStream tmpOut = null;
-//
-//
-//            try {
-//                tmpIn = mmSocket.getInputStream();
-//                tmpOut = mmSocket.getOutputStream();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//
-//            mmInStream = tmpIn;
-//            mmOutStream = tmpOut;
-//        }
-//
-//        public void run() {
-//            byte[] buffer = new byte[1024];  // buffer store for the stream
-//
-//            int bytes; // bytes returned from read()
-//
-//            // Keep listening to the InputStream until an exception occurs
-//            while (true) {
-//                // Read from the InputStream
-//                try {
-//                    bytes = mmInStream.read(buffer);
-//                    final String incomingMessage = new String(buffer, 0, bytes);
-//                    Log.d(TAG, "InputStream: " + incomingMessage);
-//                   getActivity().runOnUiThread(new Runnable() {
-//
-//                        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-//                        @Override
-//                        public void run() {
-//                            Log.d(TAG,"BUSER: "+Busername+"\n bluetooth name :"+bluetoothDevice.getName());
-//                            if(Busername.equals(bluetoothDevice.getName())){
-//                            Log.d(TAG,"Incoming message: "+incomingMessage);
-
-//                            }
-//
-//                        }
-//                    });
-//
-//
-//                } catch (IOException e) {
-//                    //Toast.makeText(getActivity(), "write: Error reading Input Stream" + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                    Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
-//                    break;
-//                }
-//            }
-//        }
-
-   // }
 private String GetIdentifiedId(){
         String usedId=bluetoothAdapter.getName()+Busername;
         return usedId;
@@ -693,17 +623,23 @@ private String GetIdentifiedId(){
             childLayout.setOrientation(LinearLayout.VERTICAL);
             String macAddress=getBluetoothMacAddress();
             Log.d(TAG,"This is my mac: "+macAddress);
+            String messageType="StringMessage";
             if (send_data.getText().length() > 0) {
                 Log.d(TAG,"my address:"+bluetoothDevice.getAddress());
+
+
                 byte[] bytes = (GetIdentifiedId()+send_data.getText().toString()).getBytes(Charset.defaultCharset());
+//               StmessageBytes=send_data.getText().toString().getBytes(Charset.defaultCharset());
+                String message=send_data.getText().toString();
+                stringMessage=new StringMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),message);
+
                 outgoing_text_view = new TextView(getActivity());
                 LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT);
-                outgoing_msg_params.width = 200;
+                outgoing_msg_params.width =WindowManager.LayoutParams.WRAP_CONTENT;
                 outgoing_msg_params.leftMargin = 180;
-                outgoing_msg_params.topMargin = 5;
-                outgoing_msg_params.bottomMargin=2;
+                outgoing_msg_params.topMargin = 2;
                 outgoing_msg_params.rightMargin = 10;
                 outgoing_text_view.setLayoutParams(new TableLayout.LayoutParams(
                         outgoing_msg_params));
@@ -715,96 +651,65 @@ private String GetIdentifiedId(){
                 outgoing_text_view.setText(send_data.getText().toString());
                 childLayout.addView(outgoing_text_view, 0);
                 //childLayout.removeView(outgoing_text_view);
+                String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(new Date());
+                TextView timeTextview=new TextView(getActivity());
+                LinearLayout.LayoutParams time_params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                time_params.width =WindowManager.LayoutParams.WRAP_CONTENT;
+                time_params.leftMargin = 200;
+                time_params.topMargin = 0;
+                time_params.bottomMargin=5;
+                time_params.rightMargin = 10;
+                timeTextview.setLayoutParams(new TableLayout.LayoutParams(
+                        time_params));
+                timeTextview.setText(timeStamp);
+                childLayout.addView(timeTextview);
                 mylayout.addView(childLayout);
                 send_data.getText().clear();
+                Log.d("my data: ",stringMessage.getMessage());
+                byte[] mybytes= toByteArray(stringMessage);
                 DashboardActivity dashboardActivity=new DashboardActivity();
                 if(dashboardActivity.mConnectedThread!=null)
-                    dashboardActivity.mConnectedThread.write(bytes);
+                   // dashboardActivity.mConnectedThread.write(bytes);
+                    dashboardActivity.mConnectedThread.write(stringMessage);
             } else {
                 send_data.setError("Message should not be empty!");
             }
 
         }
+    public static byte[] toByteArray(Object obj)
+    {
+        byte[] bytes = null;
+        ObjectOutputStream oos = null;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try
+        {
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(obj);
+            oos.flush();
+
+            return bos.toByteArray();
+        }
+        catch(Exception e)
+        {
+            Log.e("Bluetooth", "Cast exception at sending end ...");
+        }
+
+        return bytes;
+    }
 
 
-//    public void Start_Server() {
-//
-//        AcceptThread accept = new AcceptThread();
-//        accept.start();
-//
-//    }
-//
-//    private class AcceptThread extends Thread {
-//
-//        // The local server socket
-//        private final BluetoothServerSocket mmServerSocket;
-//
-//        public AcceptThread() {
-//            BluetoothServerSocket tmp = null;
-//
-//            // Create a new listening server socket
-//            try {
-//
-//                tmp = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(getString(R.string.app_name), MY_UUID_INSECURE);
-//
-//                Log.d(TAG, "AcceptThread: Setting up Server using: " + MY_UUID_INSECURE);
-//            } catch (IOException e) {
-//                Log.e(TAG, "AcceptThread: IOException: " + e.getMessage());
-//            }
-//
-//            mmServerSocket = tmp;
-//        }
-//
-//        public void run() {
-//            Log.d(TAG, "run: AcceptThread Running.");
-//
-//            BluetoothSocket socket = null;
-//
-//            try {
-//                // This is a blocking call and will only return on a
-//                // successful connection or an exception
-//                Log.d(TAG, "run: RFCOM server socket start.....");
-//
-//                socket = mmServerSocket.accept();
-//
-//                Log.d(TAG, "run: RFCOM server socket accepted connection.");
-//
-//            } catch (IOException e) {
-//                Log.e(TAG, "AcceptThread: IOException: " + e.getMessage());
-//            }
-//
-//            //talk about this is in the 3rd
-//            if (socket != null) {
-//                connected(socket);
-//            }
-//
-//            Log.i(TAG, "END mAcceptThread ");
-//        }
-//
-//        public void cancel() {
-//            Log.d(TAG, "cancel: Canceling AcceptThread.");
-//            try {
-//                mmServerSocket.close();
-//            } catch (IOException e) {
-//                Log.e(TAG, "cancel: Close of AcceptThread ServerSocket failed. " + e.getMessage());
-//            }
-//        }
-//
-//    }
-
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static byte[] encodeToBase64(Bitmap image, Bitmap.CompressFormat compressFormat, int quality){
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+        image.compress(compressFormat,quality,byteArrayOutputStream);
+        return byteArrayOutputStream.toByteArray();
+    }
     @Override
     public void onStop() {
         super.onStop();
 
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-//        switch (item.getItemId()){
-//            case android.R.id.home:
-//                getActivity().finish();
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
 }

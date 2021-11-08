@@ -13,7 +13,10 @@ import androidx.fragment.app.FragmentTransaction;
 import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -35,6 +38,17 @@ public class Dashboard_Main extends AppCompatActivity implements Dashboard_ListF
     Map<String, String> PairedList = new HashMap<String, String>();
     BluetoothAdapter mybluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     Button Scan;
+    Intent myintent ;
+    private BroadcastReceiver receiver=new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent!=null && intent.getAction().equalsIgnoreCase("message")){
+                myintent.putExtra(DashboardActivity.EXTRA_USER_ID, (int)5);
+                startActivity(myintent);
+            }
+        }
+
+    };
     ActivityResultLauncher<Intent> activityResultLauncher=registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -61,7 +75,10 @@ public class Dashboard_Main extends AppCompatActivity implements Dashboard_ListF
 
         int MY_PERMISSIOMS_REQUEST_ACCESS_COARSE_LOCATION=1;
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.BLUETOOTH,Manifest.permission.BLUETOOTH_ADMIN},MY_PERMISSIOMS_REQUEST_ACCESS_COARSE_LOCATION);
-
+       myintent= new Intent(this, DashboardActivity.class);
+        IntentFilter intentFilter=new IntentFilter();
+intentFilter.addAction("message");
+registerReceiver(receiver,intentFilter);
          Scan = (Button) findViewById(R.id.scan);
         Scan.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,6 +128,8 @@ public class Dashboard_Main extends AppCompatActivity implements Dashboard_ListF
 
     @Override
     protected void onDestroy() {
+//        if(DashboardActivity.mConnectedThread.isAlive())
+//            DashboardActivity.mConnectedThread.cancel();
         super.onDestroy();
 
     }
@@ -118,7 +137,6 @@ public class Dashboard_Main extends AppCompatActivity implements Dashboard_ListF
     public void turnonBlutooth() {
         mybluetoothAdapter.startDiscovery();
         if (mybluetoothAdapter == null) {
-
             Toast.makeText(getApplicationContext(), "BLUETOOTH NOT SUPPORTED TO DIS DEVICE", Toast.LENGTH_SHORT).show();
             return;
         }

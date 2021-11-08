@@ -1,20 +1,31 @@
 package com.hfad.bluetooth_chat_application;
 
+import static android.os.FileUtils.copy;
+
 import android.Manifest;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.FileUtils;
+import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -27,6 +38,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -43,25 +55,47 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.FileProvider;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 //This is the activity which initiates the fragment to get viewed which is sent by dashboardmain as fragment id
-public class DashboardActivity extends AppCompatActivity {
+public class DashboardActivity extends AppCompatActivity implements Serializable {
     Dashboard_ListFragment dashboardListFragment;
     BluetoothDevice my_device;
     ActionPageFragment frag;
-   public static ConnectedThread mConnectedThread;
-   public static ConnectThread connectThread;
+    public static ConnectedThread mConnectedThread;
+    public static ConnectThread connectThread;
+//    public static ConnectThread connectImageThread;
+
     private UUID deviceUUID;
+    private String mCurrentPhotoPath;
     BluetoothAdapter bluetoothAdapter;
     BluetoothDevice bluetoothDevice;
     private BluetoothDevice mmDevice;
@@ -69,55 +103,90 @@ public class DashboardActivity extends AppCompatActivity {
     LinearLayout mylayout;
     TextView Incoming_text_view;
     User user;
+    private ImageView NewImageView;
     Toolbar mytoolbar;
     ArrayList<User> arrayOfUsers;
-    private static final UUID MY_UUID_INSECURE=UUID.fromString("a1682af1-f7e0-49ec-b977-b93856cf5b79");
-    String TAG="DashboardActivity";
+    private static final UUID MY_UUID_INSECURE = UUID.fromString("a1682af1-f7e0-49ec-b977-b93856cf5b79");
+    String TAG = "DashboardActivity";
+    private static UUID image_UUID;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
     public static final String EXTRA_USER_ID = "Id";
-    public static final String notifcationId="b93856cf5b79";
-    Set<BluetoothDevice> pairedDevices=MainActivity.pairedDevices;
+    public static final String notifcationId = "b93856cf5b79";
+    Set<BluetoothDevice> pairedDevices = MainActivity.pairedDevices;
     SoftInputAssist softInputAssist;
+
+    private String getDeviceUUID() {
+        String myUuid = "";
+        String TotalUuid = "";
+        try {
+            Method getUuidsMethod = BluetoothAdapter.class.getDeclaredMethod("getUuids", null);
+            ParcelUuid[] uuids = (ParcelUuid[]) getUuidsMethod.invoke(bluetoothAdapter, null);
+            if (uuids != null) {
+                for (ParcelUuid uuid : uuids) {
+                    TotalUuid += uuid;
+                    Log.d(TAG, "UUId: " + uuid);
+                }
+                myUuid = ((uuids[0]).getUuid()).toString();
+                Log.d(TAG, "UUID length: " + myUuid.length());
+                Log.d(TAG, "TotalUUid is: " + TotalUuid + " with the length: " + TotalUuid.length());
+
+            } else
+                Log.d(TAG, "No UUID found! ");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return myUuid;
+
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityCompat.requestPermissions(this,new String[]{
-                Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.MANAGE_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},MY_CAMERA_PERMISSION_CODE);
-        bluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.MANAGE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_CAMERA_PERMISSION_CODE);
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         setContentView(R.layout.dashbord1_activity);
-          mytoolbar = (Toolbar) findViewById(R.id.actiontoolbar);
-         setSupportActionBar(mytoolbar);
-       ActionBar actionBar = getSupportActionBar();
+        mytoolbar = (Toolbar) findViewById(R.id.actiontoolbar);
+        setSupportActionBar(mytoolbar);
+        ActionBar actionBar = getSupportActionBar();
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-       actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
         createNotificationChannel();
-
-         frag = (ActionPageFragment)
+        NewImageView = new ImageView(this);
+        image_UUID = UUID.fromString(getDeviceUUID());
+        frag = (ActionPageFragment)
                 getSupportFragmentManager().findFragmentById(R.id.detail_frag);
         // frag.setWorkout(1);
         int UserId = (int) getIntent().getExtras().get(EXTRA_USER_ID);
         frag.setUser(UserId);
         //softInputAssist = new SoftInputAssist(this);
         arrayOfUsers = dashboardListFragment.arrayOfUsers;
-         user = arrayOfUsers.get((int) UserId);
+        user = arrayOfUsers.get((int) UserId);
         bluetoothDevice = dashboardListFragment.PairedList.get(user.getName());
         Log.d("devicename:", user.getName());
         Log.d("device: ", "" + bluetoothDevice);
-        Log.d(TAG,""+MY_UUID_INSECURE);
+        Log.d(TAG, "" + MY_UUID_INSECURE);
         Start_Server();
+
         DashboardActivity.connectThread = new DashboardActivity.ConnectThread(bluetoothDevice, MY_UUID_INSECURE);
-       for (BluetoothDevice mybluetoothDevice:dashboardListFragment.PairedList.values()) {
+        for (BluetoothDevice mybluetoothDevice : dashboardListFragment.PairedList.values()) {
             Log.d("Device ", "" + mybluetoothDevice);
             //if (mybluetoothDevice!=bluetoothDevice)
-           //DashboardActivity.connectThread = new DashboardActivity.ConnectThread(mybluetoothDevice, MY_UUID_INSECURE);
-    }
+            //DashboardActivity.connectThread = new DashboardActivity.ConnectThread(mybluetoothDevice, MY_UUID_INSECURE);
+        }
         DashboardActivity.connectThread.start();
+//        DashboardActivity.connectImageThread = new DashboardActivity.ConnectThread(bluetoothDevice, MY_UUID_INSECURE);
+//        DashboardActivity.connectImageThread.start();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.action_page_menu,menu);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.action_page_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -126,7 +195,7 @@ public class DashboardActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 DashboardActivity.this.finish();
-            case R.id.action_settings:  {
+            case R.id.action_settings: {
                 // navigate to settings screen
                 return true;
             }
@@ -139,7 +208,14 @@ public class DashboardActivity extends AppCompatActivity {
         }
 
     }
-   public class ConnectThread extends Thread {
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static Bitmap decodeBase64(String input) {
+        byte[] decodedBytes = Base64.getDecoder().decode(input);
+        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+    }
+
+    public class ConnectThread extends Thread {
         private BluetoothSocket mmSocket;
 
         public ConnectThread(BluetoothDevice device, UUID uuid) {
@@ -202,160 +278,301 @@ public class DashboardActivity extends AppCompatActivity {
         mConnectedThread = new DashboardActivity.ConnectedThread(mmSocket);
         mConnectedThread.start();
     }
-    private void createNotificationChannel(){
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
-            CharSequence name=getString(R.string.chanel_name);
-            String description=getString(R.string.chanel_description);
-            int importance=NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel chanel=new NotificationChannel(notifcationId,name,importance);
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.chanel_name);
+            String description = getString(R.string.chanel_description);
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel chanel = new NotificationChannel(notifcationId, name, importance);
             chanel.setDescription(description);
-            NotificationManager notificationManager=getSystemService(NotificationManager.class);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
             chanel.enableLights(true);
             chanel.enableVibration(true);
-            chanel.setVibrationPattern(new long[]{100,200,300,400,500,400,300,200,400});
+            chanel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
             notificationManager.createNotificationChannel(chanel);
 
         }
     }
 
-     class ConnectedThread extends Thread {
-         private final BluetoothSocket mmSocket;
-         private final InputStream mmInStream;
-         private final OutputStream mmOutStream;
+    class ConnectedThread extends Thread {
+        private final BluetoothSocket mmSocket;
+        private final InputStream mmInStream = null;
+        private final OutputStream mmOutStream = null;
+        private final ObjectInputStream objectInputStream;
+        private final ObjectOutputStream objectOutputStream;
 
-         public ConnectedThread(BluetoothSocket socket) {
-             Log.d(TAG, "ConnectedThread: Starting.");
+        public ConnectedThread(BluetoothSocket socket) {
+            Log.d(TAG, "ConnectedThread: Starting.");
 
-             mmSocket = socket;
-             InputStream tmpIn = null;
-             OutputStream tmpOut = null;
+            mmSocket = socket;
+            InputStream tmpIn = null;
+            OutputStream tmpOut = null;
+            ObjectInputStream tmpobjectInputStream = null;
+            ObjectOutputStream tmpobjectOutputStream = null;
+
+            try {
+                //tmpIn = mmSocket.getInputStream();
+                // tmpOut = mmSocket.getOutputStream();
+                tmpobjectOutputStream = new ObjectOutputStream(mmSocket.getOutputStream());
+                tmpobjectInputStream = new ObjectInputStream(mmSocket.getInputStream());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.d("error:", e.getMessage());
+            }
+
+            //mmInStream = tmpIn;
+            //mmOutStream = tmpOut;
+            objectInputStream = tmpobjectInputStream;
+            objectOutputStream = tmpobjectOutputStream;
+        }
+        public File createImageFile(String imageFileName) throws IOException {
+            // Create an image file name
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+//            String imageFileName = "IMAGE_" + timeStamp + "_";
+            String folder_main = "BluetoothChatFolder";
+            File storageDir = new File(Environment.getExternalStorageDirectory() + "/" + folder_main, "Images");
+            if (!storageDir.exists()) {
+                storageDir.mkdirs();
+            }
+            File image = File.createTempFile(
+                    imageFileName,  // prefix
+                    ".jpg",         // suffix
+                    storageDir      // directory
+            );
+
+            // Save a file: path for use with ACTION_VIEW intents
+            mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+            return image;
+        }
+        @RequiresApi(api = Build.VERSION_CODES.Q)
+        public void run() {
+            byte[] buffer = new byte[1024];  // buffer store for the stream
+
+            int bytes; // bytes returned from read()
+            // Keep listening to the InputStream until an exception occurs
+            while (true) {
+                // Read from the InputStream
+                try {
+                    Uri photoUri=null;
+                    String incomingMessage = null;
+                    StringMessage stringMessage=null;
+                    ImageMessage imageMessage=null;
+                    File myfile=null;
+                    Bitmap imageBitmap=null;
+                    File madefile=null;
+                    byte[]  imagebytes=null;
+                    MessageClass messageClass = (MessageClass) objectInputStream.readObject();
+                    if(messageClass.getMessageType().equalsIgnoreCase("StringMessage")) {
+                        stringMessage = (StringMessage) messageClass;
+                        incomingMessage = (stringMessage.getMessage());
+                        Log.d(TAG, "InputStream: " + incomingMessage);
+
+                    }
+                    if(messageClass.getMessageType().equalsIgnoreCase("Image")){
+                        imageMessage=(ImageMessage) messageClass;
+                        Log.d(TAG,"Image received "+imageMessage.getImageName());
+                        myfile=imageMessage.getMyfile();
+                        imagebytes=imageMessage.getImagebytes();
+                         madefile=createImageFile(imageMessage.getImageName());
+                         //imageBitmap=imageMessage.getImagebitmap();
+                        FileOutputStream fo = new FileOutputStream(madefile);
+                        copy(new FileInputStream(myfile), fo);
+                        fo.write(buffer);
+                        fo.close();
+                         photoUri= FileProvider.getUriForFile(DashboardActivity.this,BuildConfig.APPLICATION_ID+".provider",madefile);
+
+                         Log.d("path: ",photoUri.getPath());
+                    }
 
 
-             try {
-                 tmpIn = mmSocket.getInputStream();
-                 tmpOut = mmSocket.getOutputStream();
-             } catch (IOException e) {
-                 e.printStackTrace();
-             }
+                    // incomingMessage = new String(buffer, 0, bytes);
 
-             mmInStream = tmpIn;
-             mmOutStream = tmpOut;
-         }
 
-         public void run() {
-             byte[] buffer = new byte[1024];  // buffer store for the stream
+                    String finalIncomingMessage = incomingMessage;
+                    StringMessage finalStringMessage = stringMessage;
+                    ImageMessage finalImageMessage = imageMessage;
+                    Uri finalPhotoUri = photoUri;
+                    File finalMyfile =madefile;
+                    Bitmap finalImageBitmap = imageBitmap;
+                    byte[] finalImagebytes = imagebytes;
+                    runOnUiThread(new Runnable() {
 
-             int bytes; // bytes returned from read()
+                        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+                        @Override
+                        public void run() {
 
-             // Keep listening to the InputStream until an exception occurs
-             while (true) {
-                 // Read from the InputStream
-                 try {
-                     bytes = mmInStream.read(buffer);
-                     final String incomingMessage = new String(buffer, 0, bytes);
-                     Log.d(TAG, "InputStream: " + incomingMessage);
-                     runOnUiThread(new Runnable() {
+                            Log.d(TAG, "Bluetooth uuid id" + bluetoothDevice.getUuids()[0].toString());
+                            Log.d(TAG, "Incoming message is :" + finalIncomingMessage);
+                            String sender = bluetoothDevice.getName();
+                            String receiver = bluetoothAdapter.getName();
+//                             int IdLength = IdentifiedId.length();
+                            Intent resultIntent = new Intent(DashboardActivity.this, Dashboard_Main.class);
+                            resultIntent.setAction("message");
+                            sendBroadcast(resultIntent);
+                            PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, resultIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                            String receiverId = messageClass.getReceiver();
+                            String SenderId = messageClass.getSender();
+                            Log.d("Receiver:", receiverId);
+                            Log.d(TAG, "new coming message: " + finalIncomingMessage);
+                            //Log.d(TAG, "are they equal?" + (receiverId == bluetoothDevice.getAddress()));
+                            if (receiverId.equalsIgnoreCase(receiver) && SenderId.equalsIgnoreCase(sender)) {
+                                mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
+                                Log.d(TAG, "sent: " + receiverId + " , received: " + bluetoothDevice.getAddress());
+                                LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.MATCH_PARENT);
+                                childLayout = new LinearLayout(DashboardActivity.this);
+                                childLayout.setLayoutParams(linearParams);
+                                childLayout.setOrientation(LinearLayout.VERTICAL);
+                                linearParams.setMargins(10, 10, 10, 10);
 
-                         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-                         @Override
-                         public void run() {
-                             // Log.d(TAG,"BUSER: "+Busername+"\n bluetooth name :"+bluetoothDevice.getName());
-                             // if(Busername.equals(bluetoothDevice.getName())){
-                             Log.d(TAG, "Bluetooth uuid id" + bluetoothDevice.getUuids()[0].toString());
-                             Log.d(TAG, "Incoming message is :" + incomingMessage);
-                             String IdentifiedId = bluetoothDevice.getName() + bluetoothAdapter.getName();
-                             int IdLength = IdentifiedId.length();
-                             if (incomingMessage.length() > IdLength) {
-                                 String receiverId = incomingMessage.substring(0, IdLength);
-                                 Log.d("Receiver:", receiverId);
-                                 Log.d(TAG, "new coming message: " + incomingMessage.substring(IdLength));
-                                 Log.d(TAG, "are they equal?" + (receiverId == bluetoothDevice.getAddress()));
-                                 mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
-                                 if (receiverId.equalsIgnoreCase(IdentifiedId)) {
-                                     Log.d(TAG, "sent: " + receiverId + " , received: " + bluetoothDevice.getAddress());
-                                     LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
-                                             LinearLayout.LayoutParams.WRAP_CONTENT,
-                                             LinearLayout.LayoutParams.MATCH_PARENT);
-                                     childLayout = new LinearLayout(DashboardActivity.this);
-                                     childLayout.setLayoutParams(linearParams);
-                                     childLayout.setOrientation(LinearLayout.VERTICAL);
-                                     linearParams.setMargins(10, 10, 10, 10);
+                                LinearLayout.LayoutParams comingmessageParams = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                                comingmessageParams.width = 200;
+                                comingmessageParams.leftMargin = 5;
+                                comingmessageParams.rightMargin = 100;
+                                comingmessageParams.topMargin = 2;
+                                comingmessageParams.bottomMargin = 5;
+                                LinearLayout.LayoutParams yourmessageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                                comingmessageParams.width = 200;
+                                comingmessageParams.leftMargin = 70;
 
-                                     LinearLayout.LayoutParams comingmessageParams = new LinearLayout.LayoutParams(
-                                             LinearLayout.LayoutParams.WRAP_CONTENT,
-                                             LinearLayout.LayoutParams.WRAP_CONTENT);
-                                     comingmessageParams.width = 200;
-                                     comingmessageParams.leftMargin = 5;
-                                     comingmessageParams.rightMargin = 100;
-                                     comingmessageParams.topMargin = 5;
-                                     LinearLayout.LayoutParams yourmessageParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                                             LinearLayout.LayoutParams.WRAP_CONTENT);
-                                     comingmessageParams.width = 200;
-                                     comingmessageParams.leftMargin = 70;
+                                comingmessageParams.rightMargin = 10;
+                                if(finalStringMessage !=null) {
+                                    Incoming_text_view = new TextView(DashboardActivity.this);
+                                    Incoming_text_view.setLayoutParams(new TableLayout.LayoutParams(
+                                            comingmessageParams));
+                                    Incoming_text_view.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
+                                    Incoming_text_view.setTextSize(16);
+                                    Incoming_text_view.setPadding(5, 3, 0, 50);
+                                    Incoming_text_view.setTypeface(null, Typeface.ITALIC);
+                                    Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
 
-                                     comingmessageParams.rightMargin = 10;
-                                     Incoming_text_view = new TextView(DashboardActivity.this);
-                                     Incoming_text_view.setLayoutParams(new TableLayout.LayoutParams(
-                                             comingmessageParams));
-                                     Incoming_text_view.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
-                                     Incoming_text_view.setTextSize(16);
-                                     Incoming_text_view.setPadding(5, 3, 0, 50);
-                                     Incoming_text_view.setTypeface(null, Typeface.ITALIC);
-                                     Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
+                                    Incoming_text_view.setText(finalIncomingMessage);
+                                    TextView timeTextview = new TextView(DashboardActivity.this);
+                                    Toast.makeText(getApplicationContext(), "" + user.getName() + " has sent you a message!", Toast.LENGTH_SHORT).show();
+                                    childLayout.addView(Incoming_text_view, 0);
 
-                                     Incoming_text_view.setText(incomingMessage.substring(IdLength));
-                                     Toast.makeText(getApplicationContext(), "" + user.getName() + " has sent you a message!", Toast.LENGTH_SHORT).show();
-                                     childLayout.addView(Incoming_text_view, 0);
-                                     mylayout.addView(childLayout);
+                                    String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(new Date());
+                                    LinearLayout.LayoutParams time_params = new LinearLayout.LayoutParams(
+                                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                                    time_params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                                    time_params.leftMargin = 200;
+                                    time_params.topMargin = 0;
+                                    time_params.bottomMargin = 5;
+                                    time_params.rightMargin = 10;
+                                    timeTextview.setLayoutParams(new TableLayout.LayoutParams(
+                                            time_params));
+                                    timeTextview.setText(timeStamp);
+                                    childLayout.addView(timeTextview);
+                                    mylayout.addView(childLayout);
+                                    String senderName = "";
+                                    senderName = SenderId;
+                                    Log.d(TAG, "Incoming message: " + finalIncomingMessage + " From " + bluetoothDevice.toString());
+                                    int notfication_number = 1;
+                                    Log.d("current id", bluetoothDevice.getName());
+                                    NotificationCompat.Builder builder = new NotificationCompat.Builder(DashboardActivity.this, notifcationId)
+                                            .setSmallIcon(R.drawable.messageicon)
+                                            .setContentTitle(senderName + ": message")
+                                            .setPriority(NotificationCompat.PRIORITY_HIGH)
+                                            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                                            .setStyle(new NotificationCompat.BigTextStyle().bigText(finalIncomingMessage))
+                                            .setContentIntent(pendingIntent)
+                                            .setContentText("Incoming message");
+                                    builder.setNumber(++notfication_number);
+                                    // Adding notification
+                                    NotificationManager manager = (NotificationManager) DashboardActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                    manager.notify(0, builder.build());
+                                }
+                                if(finalImageMessage !=null){
+                                    NewImageView=new ImageView(DashboardActivity.this);
+                                    InputStream imageStream = null;
+//                                    try {
+//                                        Uri myfileuri=Uri.parse(finalMyfile.getAbsolutePath());
+//                                        Log.d("image","path :"+myfileuri.getPath());
+//                                        imageStream = DashboardActivity.this.getContentResolver().openInputStream(myfileuri);
+//                                    } catch (FileNotFoundException e) {
+//                                        e.printStackTrace();
+//                                    }
+                                    //final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                                    final Bitmap selectedImage = BitmapFactory.decodeByteArray(finalImagebytes,0, finalImagebytes.length);
+                                    NewImageView.setPadding(5, 5, 5, 5);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                        NewImageView.setForegroundGravity(Gravity.LEFT | Gravity.CENTER);
+                                    }
 
-                                 }
-                                 Log.d(TAG, "Incoming message: " + incomingMessage.substring(IdLength) + " From " + bluetoothDevice.toString());
-                                 int notfication_number = 0;
-                                 Log.d("current id", bluetoothDevice.getName());
-                                 NotificationCompat.Builder builder = new NotificationCompat.Builder(DashboardActivity.this, notifcationId)
-                                         .setSmallIcon(R.drawable.messageicon)
-                                         .setContentTitle(user.getName() + ": message")
-                                         .setPriority(NotificationCompat.PRIORITY_HIGH)
-                                         .setStyle(new NotificationCompat.BigTextStyle().bigText(incomingMessage.substring(IdLength)))
-                                         .setContentText("Incoming message");
-                                 builder.setNumber(++notfication_number);
-                                 // Adding notification
-                                 NotificationManager manager = (NotificationManager) DashboardActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                                 manager.notify(0, builder.build());
-                             }
-                         }
-                     });
+                                    NewImageView.setImageBitmap(selectedImage);
+                                    mylayout.addView(NewImageView);
+                                }
+                        }
+                        //}
+                    }
 //                    while(DashboardActivity.incomingMessagesObjCopy.size()>0){
 
 
+                    });
 
+                }
+                catch (Exception e) {
+                    //Toast.makeText(getActivity(), "write: Error reading Input Stream" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
+                    Log.d(TAG, e.getMessage());
+                    break;
+                }
+            }
+        }
 
-                 } catch (IOException e) {
-                     //Toast.makeText(getActivity(), "write: Error reading Input Stream" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage());
-                     break;
-                 }
-             }
-         }
-         public void cancel() {
-             try {
-                 mmSocket.close();
-             } catch (IOException e) {
-             }
-         }
-         public void write(byte[] bytes) {
-             String text = new String(bytes, Charset.defaultCharset());
-             Log.d(TAG, "write: Writing to outputstream: " + text);
-             try {
-                 if(mmOutStream!=null)
-                 mmOutStream.write(bytes);
-                 mmOutStream.flush();
-             } catch (IOException e) {
-                 Toast.makeText(getApplicationContext(), "write: Error writing to output stream", Toast.LENGTH_SHORT).show();
-                 Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
-             }
-         }
-     }
+        public void cancel() {
+            try {
+                mmSocket.close();
+            } catch (IOException e) {
+            }
+        }
+
+        public void write(MessageClass messageClass) {
+            try {
+                if (objectOutputStream != null)
+//                 mmOutStream.write(bytes);
+//                 mmOutStream.flush();
+                {
+                    objectOutputStream.writeObject(messageClass);
+                    objectOutputStream.flush();
+                }
+            } catch (IOException e) {
+                Toast.makeText(getApplicationContext(), "write: Error writing to output stream", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
+            }
+        }
+//           public void write(byte[] bytes) {
+//             //String text = new String(bytes, Charset.defaultCharset());
+//            // Log.d(TAG, "write: Writing to outputstream: " + text);
+//             try {
+//                 if(objectOutputStream!=null)
+////                 mmOutStream.write(bytes);
+////                 mmOutStream.flush();
+//                     objectOutputStream.writeObject(bytes);
+//                     objectOutputStream.flush();
+//             } catch (IOException e) {
+//                 Toast.makeText(getApplicationContext(), "write: Error writing to output stream", Toast.LENGTH_SHORT).show();
+//                 Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
+//             }
+
+//         public void writeImage(byte[] bytes){
+//             try{
+//                 mmOutStream.write(bytes,0,bytes.length);
+//                 mmOutStream.flush();
+//             } catch (IOException e) {
+//                 Toast.makeText(getApplicationContext(), "write: Error writing to output stream", Toast.LENGTH_SHORT).show();
+//                 Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
+//             }
+//         }
+}
+
 
     private class AcceptThread extends Thread {
 
@@ -415,8 +632,25 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mConnectedThread.isAlive())
-            mConnectedThread.cancel();
+//        if(mConnectedThread.isAlive())
+//            mConnectedThread.cancel();
+    }
+    public static Object toObject(byte[] bytes)
+    {
+        Object obj = null;
+        ObjectInputStream ois = null;
+
+        try
+        {
+            ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+            return ois.readObject();
+        }
+        catch(Exception ex)
+        {
+            Log.e("Bluetooth", "Cast exception at receiving end ...");
+        }
+
+        return obj;
     }
 
 }
