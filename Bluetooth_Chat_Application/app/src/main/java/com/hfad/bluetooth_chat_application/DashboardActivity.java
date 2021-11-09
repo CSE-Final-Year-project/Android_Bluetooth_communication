@@ -327,6 +327,30 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
             objectInputStream = tmpobjectInputStream;
             objectOutputStream = tmpobjectOutputStream;
         }
+        private File copyFile(File source,File destination) throws IOException {
+            InputStream inputStream=new FileInputStream(source);
+            try {
+                OutputStream outputStream=new FileOutputStream(destination);
+                try{
+                    byte[] buf=new byte[1024];
+                    int len;
+                    while((len=inputStream.read(buf))>0){
+                        outputStream.write(buf,0,len);
+                        Log.d(TAG,"Streams are ggetting writen: "+len);
+                    }
+
+                }
+                finally {
+                    outputStream.close();
+                }
+            }
+            finally {
+                inputStream.close();
+            }
+            return destination;
+
+
+        }
         public File createImageFile(String imageFileName) throws IOException {
             // Create an image file name
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -362,7 +386,10 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                     File myfile=null;
                     Bitmap imageBitmap=null;
                     File madefile=null;
+                    Bitmap b2=null;
+                    BitmapDataObject bitmapDataObject=new BitmapDataObject();
                     byte[]  imagebytes=null;
+                    File createdFile=null;
                     MessageClass messageClass = (MessageClass) objectInputStream.readObject();
                     if(messageClass.getMessageType().equalsIgnoreCase("StringMessage")) {
                         stringMessage = (StringMessage) messageClass;
@@ -372,18 +399,43 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                     }
                     if(messageClass.getMessageType().equalsIgnoreCase("Image")){
                         imageMessage=(ImageMessage) messageClass;
-                        Log.d(TAG,"Image received "+imageMessage.getImageName());
+                        bitmapDataObject=(BitmapDataObject)imageMessage.getBitmap();
+                        imageBitmap=imageMessage.convertToBitmap();
+                        Log.d("Bitmap:",imageBitmap.toString());
+                        Log.d(TAG,"Image received "+imageMessage.getMyfile().getPath());
                         myfile=imageMessage.getMyfile();
-                        imagebytes=imageMessage.getImagebytes();
-                         madefile=createImageFile(imageMessage.getImageName());
-                         //imageBitmap=imageMessage.getImagebitmap();
-                        FileOutputStream fo = new FileOutputStream(madefile);
-                        copy(new FileInputStream(myfile), fo);
-                        fo.write(buffer);
-                        fo.close();
-                         photoUri= FileProvider.getUriForFile(DashboardActivity.this,BuildConfig.APPLICATION_ID+".provider",madefile);
+//                         madefile=createImageFile(imageMessage.getImageName());
+//                         //imageBitmap=imageMessage.getImagebitmap();
+//                        FileOutputStream fo = new FileOutputStream(madefile);
+//                        copy(new FileInputStream(myfile), fo);
+//                        fo.write(buffer);
+//                        fo.close();
+                        int origWidth = imageBitmap.getWidth();
+                        int origHeight = imageBitmap.getHeight();
+                        final int destWidth = 600;
+                        int destHeight=origHeight;
+                        // imageView.setImageBitmap(selectedImage);
+                        if (origWidth > destWidth) {
+                            // picture is wider than we want it, we calculate its target height
+                            destHeight = origHeight / (origWidth / destWidth);
+                        }
+                            // we create an scaled bitmap so it reduces the image, not just trim it
+                             b2 = Bitmap.createScaledBitmap(imageBitmap, destWidth, destHeight, false);
+                            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+                            // compress to the format you want, JPEG, PNG...
+                            // 70 is the 0-100 quality percentage
+                            b2.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
+                            File received = createImageFile(imageMessage.getImageName());
+                            FileOutputStream fo = new FileOutputStream(received);
+                            fo.write(outStream.toByteArray());
+                            //createdFile=copyFile(myfile,madefile);
+                            createdFile=received;
+                            Log.d(TAG,"created file: "+createdFile.getPath());
+                            photoUri= FileProvider.getUriForFile(DashboardActivity.this,BuildConfig.APPLICATION_ID+".provider",createdFile);
 
-                         Log.d("path: ",photoUri.getPath());
+                            Log.d("path: ",photoUri.getPath());
+
+
                     }
 
 
@@ -394,9 +446,11 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                     StringMessage finalStringMessage = stringMessage;
                     ImageMessage finalImageMessage = imageMessage;
                     Uri finalPhotoUri = photoUri;
-                    File finalMyfile =madefile;
+                    File finalMyfile =createdFile;
                     Bitmap finalImageBitmap = imageBitmap;
                     byte[] finalImagebytes = imagebytes;
+                    Bitmap finalImageBitmap1 = imageBitmap;
+                    Bitmap finalB = b2;
                     runOnUiThread(new Runnable() {
 
                         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -492,21 +546,20 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                                 if(finalImageMessage !=null){
                                     NewImageView=new ImageView(DashboardActivity.this);
                                     InputStream imageStream = null;
-//                                    try {
-//                                        Uri myfileuri=Uri.parse(finalMyfile.getAbsolutePath());
-//                                        Log.d("image","path :"+myfileuri.getPath());
-//                                        imageStream = DashboardActivity.this.getContentResolver().openInputStream(myfileuri);
-//                                    } catch (FileNotFoundException e) {
-//                                        e.printStackTrace();
-//                                    }
-                                    //final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                                    final Bitmap selectedImage = BitmapFactory.decodeByteArray(finalImagebytes,0, finalImagebytes.length);
+                                    try {
+                                        Uri myfileuri=Uri.parse(finalMyfile.getAbsolutePath());
+                                        Log.d("image","path :"+myfileuri.getPath());
+                                        imageStream = DashboardActivity.this.getContentResolver().openInputStream(myfileuri);
+                                    } catch (FileNotFoundException e) {
+                                        e.printStackTrace();
+                                    }
+                                    final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
                                     NewImageView.setPadding(5, 5, 5, 5);
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                         NewImageView.setForegroundGravity(Gravity.LEFT | Gravity.CENTER);
                                     }
 
-                                    NewImageView.setImageBitmap(selectedImage);
+                                    NewImageView.setImageBitmap(finalB);
                                     mylayout.addView(NewImageView);
                                 }
                         }

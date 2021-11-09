@@ -182,6 +182,8 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 fo.write(outStream.toByteArray());
                                 byte[] imagebytes=outStream.toByteArray();
                                 String messageType="Image";
+                                BitmapDataObject bitmapDataObject=new BitmapDataObject();
+                                bitmapDataObject.imageByteArray=imagebytes;
                                 messageClass=new ImageMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),myfile.getName(),myfile,imagebytes);
                                 DashboardActivity.mConnectedThread.write(messageClass);
 
@@ -290,6 +292,8 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 String messageType="Image";
                                 String selectedPath = imageUri.getPath();
                                 File f = new File(selectedPath);
+                                BitmapDataObject bitmapDataObject=new BitmapDataObject();
+                                bitmapDataObject.imageByteArray=imageToSend;
                                 messageClass=new ImageMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),f.getName(),f,imageToSend);
                                 DashboardActivity.mConnectedThread.write(messageClass);
 
