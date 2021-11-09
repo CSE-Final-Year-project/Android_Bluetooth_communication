@@ -326,6 +326,7 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
             //mmOutStream = tmpOut;
             objectInputStream = tmpobjectInputStream;
             objectOutputStream = tmpobjectOutputStream;
+            mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
         }
         private File copyFile(File source,File destination) throws IOException {
             InputStream inputStream=new FileInputStream(source);
@@ -386,7 +387,7 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                     File myfile=null;
                     Bitmap imageBitmap=null;
                     File madefile=null;
-                    Bitmap b2=null;
+                    Bitmap b2 = null;
                     BitmapDataObject bitmapDataObject=new BitmapDataObject();
                     byte[]  imagebytes=null;
                     File createdFile=null;
@@ -471,8 +472,9 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                             Log.d("Receiver:", receiverId);
                             Log.d(TAG, "new coming message: " + finalIncomingMessage);
                             //Log.d(TAG, "are they equal?" + (receiverId == bluetoothDevice.getAddress()));
+
                             if (receiverId.equalsIgnoreCase(receiver) && SenderId.equalsIgnoreCase(sender)) {
-                                mylayout = (LinearLayout) findViewById(R.id.my_message_pane_layout);
+
                                 Log.d(TAG, "sent: " + receiverId + " , received: " + bluetoothDevice.getAddress());
                                 LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
                                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -496,20 +498,8 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                                 comingmessageParams.leftMargin = 70;
 
                                 comingmessageParams.rightMargin = 10;
-                                if(finalStringMessage !=null) {
-                                    Incoming_text_view = new TextView(DashboardActivity.this);
-                                    Incoming_text_view.setLayoutParams(new TableLayout.LayoutParams(
-                                            comingmessageParams));
-                                    Incoming_text_view.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
-                                    Incoming_text_view.setTextSize(16);
-                                    Incoming_text_view.setPadding(5, 3, 0, 50);
-                                    Incoming_text_view.setTypeface(null, Typeface.ITALIC);
-                                    Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
 
-                                    Incoming_text_view.setText(finalIncomingMessage);
-                                    TextView timeTextview = new TextView(DashboardActivity.this);
-                                    Toast.makeText(getApplicationContext(), "" + user.getName() + " has sent you a message!", Toast.LENGTH_SHORT).show();
-                                    childLayout.addView(Incoming_text_view, 0);
+
 
                                     String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(new Date());
                                     LinearLayout.LayoutParams time_params = new LinearLayout.LayoutParams(
@@ -520,6 +510,20 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                                     time_params.topMargin = 0;
                                     time_params.bottomMargin = 5;
                                     time_params.rightMargin = 10;
+                                    TextView timeTextview = new TextView(DashboardActivity.this);
+                                    Toast.makeText(getApplicationContext(), "" + user.getName() + " has sent you a message!", Toast.LENGTH_SHORT).show();
+                                if(finalStringMessage !=null) {
+                                    Incoming_text_view = new TextView(DashboardActivity.this);
+                                    Incoming_text_view.setLayoutParams(new TableLayout.LayoutParams(
+                                            comingmessageParams));
+                                    Incoming_text_view.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
+                                    Incoming_text_view.setTextSize(16);
+                                    Incoming_text_view.setPadding(5, 3, 0, 50);
+                                    Incoming_text_view.setTypeface(null, Typeface.ITALIC);
+                                    Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
+                                    Incoming_text_view.setText(finalIncomingMessage);
+                                    childLayout.addView(Incoming_text_view, 0);
+
                                     timeTextview.setLayoutParams(new TableLayout.LayoutParams(
                                             time_params));
                                     timeTextview.setText(timeStamp);
@@ -544,7 +548,15 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                                     manager.notify(0, builder.build());
                                 }
                                 if(finalImageMessage !=null){
+
+                                    childLayout = new LinearLayout(DashboardActivity.this);
+                                    childLayout.setLayoutParams(linearParams);
+                                    childLayout.setOrientation(LinearLayout.VERTICAL);
                                     NewImageView=new ImageView(DashboardActivity.this);
+                                    NewImageView.setLayoutParams(new TableLayout.LayoutParams(
+                                            comingmessageParams));
+//                                    NewImageView.setMaxHeight(70);
+//                                    NewImageView.setMaxWidth(60);
                                     InputStream imageStream = null;
                                     try {
                                         Uri myfileuri=Uri.parse(finalMyfile.getAbsolutePath());
@@ -560,7 +572,13 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                                     }
 
                                     NewImageView.setImageBitmap(finalB);
-                                    mylayout.addView(NewImageView);
+
+                                    timeTextview.setLayoutParams(new TableLayout.LayoutParams(
+                                            time_params));
+                                    timeTextview.setText(timeStamp);
+                                    childLayout.addView(timeTextview);
+                                    childLayout.addView(NewImageView);
+                                    mylayout.addView(childLayout);
                                 }
                         }
                         //}
@@ -601,29 +619,7 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                 Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
             }
         }
-//           public void write(byte[] bytes) {
-//             //String text = new String(bytes, Charset.defaultCharset());
-//            // Log.d(TAG, "write: Writing to outputstream: " + text);
-//             try {
-//                 if(objectOutputStream!=null)
-////                 mmOutStream.write(bytes);
-////                 mmOutStream.flush();
-//                     objectOutputStream.writeObject(bytes);
-//                     objectOutputStream.flush();
-//             } catch (IOException e) {
-//                 Toast.makeText(getApplicationContext(), "write: Error writing to output stream", Toast.LENGTH_SHORT).show();
-//                 Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
-//             }
 
-//         public void writeImage(byte[] bytes){
-//             try{
-//                 mmOutStream.write(bytes,0,bytes.length);
-//                 mmOutStream.flush();
-//             } catch (IOException e) {
-//                 Toast.makeText(getApplicationContext(), "write: Error writing to output stream", Toast.LENGTH_SHORT).show();
-//                 Log.e(TAG, "write: Error writing to output stream. " + e.getMessage());
-//             }
-//         }
 }
 
 

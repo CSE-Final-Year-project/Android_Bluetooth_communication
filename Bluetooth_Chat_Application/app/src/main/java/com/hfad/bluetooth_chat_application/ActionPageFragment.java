@@ -161,10 +161,12 @@ public class ActionPageFragment extends Fragment implements Serializable {
                             int origWidth = selectedImage.getWidth();
                             int origHeight = selectedImage.getHeight();
                             final int destWidth = 600;
+                            int destHeight=origHeight;
                            // imageView.setImageBitmap(selectedImage);
                             if (origWidth > destWidth) {
                                 // picture is wider than we want it, we calculate its target height
-                                int destHeight = origHeight / (origWidth / destWidth);
+                                destHeight = origHeight / (origWidth / destWidth);
+                            }
                                 // we create an scaled bitmap so it reduces the image, not just trim it
                                 Bitmap b2 = Bitmap.createScaledBitmap(selectedImage, destWidth, destHeight, false);
                                 ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -180,12 +182,10 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 File myfile=createImageFile();
                                 FileOutputStream fo = new FileOutputStream(myfile);
                                 fo.write(outStream.toByteArray());
-                                byte[] imagebytes=outStream.toByteArray();
+                                byte[] myImagebytes=outStream.toByteArray();
                                 String messageType="Image";
                                 BitmapDataObject bitmapDataObject=new BitmapDataObject();
-                                bitmapDataObject.imageByteArray=imagebytes;
-                                messageClass=new ImageMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),myfile.getName(),myfile,imagebytes);
-                                DashboardActivity.mConnectedThread.write(messageClass);
+                               // bitmapDataObject.imageByteArray=imagebytes;
 
                                 //deletting tthe overwritten file
                                 File fdelete = new File(imageUri.getPath());
@@ -214,7 +214,10 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 NewImageView.setForegroundGravity(Gravity.LEFT | Gravity.CENTER);
                                 NewImageView.setImageBitmap(selectedImage);
                                 mylayout.addView(NewImageView);
-                                NewImageView.setOnClickListener(new View.OnClickListener() {
+                            messageClass=new ImageMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),myfile.getName(),myfile, myImagebytes);
+                            DashboardActivity.mConnectedThread.write(messageClass);
+
+                            NewImageView.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
                                         Intent intent=new Intent(Intent.ACTION_VIEW);
@@ -224,7 +227,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                     }
                                 });
 
-                            }
+
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         } catch (IOException e) {
@@ -287,8 +290,23 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 NewImageView.setForegroundGravity(Gravity.LEFT | Gravity.CENTER);
                                 NewImageView.setImageBitmap(selectedImage);
                                 mylayout.addView(NewImageView);
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                byte[] imageToSend=encodeToBase64(selectedImage, Bitmap.CompressFormat.JPEG,100);
+                            int origWidth = selectedImage.getWidth();
+                            int origHeight = selectedImage.getHeight();
+                            int destHeight=origHeight;
+                            final int destWidth = 600;
+                            if (origWidth > destWidth) {
+                                // picture is wider than we want it, we calculate its target height
+                                destHeight = origHeight / (origWidth / destWidth);
+                            }
+                            Bitmap b2 = Bitmap.createScaledBitmap(selectedImage,destWidth,destHeight, false);
+                            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+                            // compress to the format you want, JPEG, PNG...
+                            // 70 is the 0-100 quality percentage
+                            b2.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
+
+                            byte[] imagebytes=outStream.toByteArray();
+                               // byte[] imageToSend=encodeToBase64(selectedImage, Bitmap.CompressFormat.JPEG,100);
+                            byte[]imageToSend=imagebytes;
                                 String messageType="Image";
                                 String selectedPath = imageUri.getPath();
                                 File f = new File(selectedPath);
@@ -297,7 +315,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 messageClass=new ImageMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),f.getName(),f,imageToSend);
                                 DashboardActivity.mConnectedThread.write(messageClass);
 
-                            }
+
 
                             NewImageView.setOnClickListener(new View.OnClickListener() {
                                 @Override
