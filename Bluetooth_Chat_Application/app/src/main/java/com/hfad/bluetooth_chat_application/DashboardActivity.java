@@ -385,6 +385,7 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                     StringMessage stringMessage=null;
                     ImageMessage imageMessage=null;
                     File myfile=null;
+                    String imagename=null;
                     Bitmap imageBitmap=null;
                     File madefile=null;
                     Bitmap b2 = null;
@@ -402,6 +403,7 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                         imageMessage=(ImageMessage) messageClass;
                         bitmapDataObject=(BitmapDataObject)imageMessage.getBitmap();
                         imageBitmap=imageMessage.convertToBitmap();
+                        imagename=imageMessage.imageName;
                         Log.d("Bitmap:",imageBitmap.toString());
                         Log.d(TAG,"Image received "+imageMessage.getMyfile().getPath());
                         myfile=imageMessage.getMyfile();
@@ -452,6 +454,7 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                     byte[] finalImagebytes = imagebytes;
                     Bitmap finalImageBitmap1 = imageBitmap;
                     Bitmap finalB = b2;
+                    String finalImagename = imagename;
                     runOnUiThread(new Runnable() {
 
                         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -479,6 +482,7 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                                 LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
                                         LinearLayout.LayoutParams.WRAP_CONTENT,
                                         LinearLayout.LayoutParams.MATCH_PARENT);
+
                                 childLayout = new LinearLayout(DashboardActivity.this);
                                 childLayout.setLayoutParams(linearParams);
                                 childLayout.setOrientation(LinearLayout.VERTICAL);
@@ -516,18 +520,21 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                                     Incoming_text_view = new TextView(DashboardActivity.this);
                                     Incoming_text_view.setLayoutParams(new TableLayout.LayoutParams(
                                             comingmessageParams));
-                                    Incoming_text_view.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
+                                    childLayout.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
                                     Incoming_text_view.setTextSize(16);
                                     Incoming_text_view.setPadding(5, 3, 0, 50);
                                     Incoming_text_view.setTypeface(null, Typeface.ITALIC);
                                     Incoming_text_view.setGravity(Gravity.LEFT | Gravity.CENTER);
                                     Incoming_text_view.setText(finalIncomingMessage);
+                                    childLayout.addView(timeTextview);
                                     childLayout.addView(Incoming_text_view, 0);
 
-                                    timeTextview.setLayoutParams(new TableLayout.LayoutParams(
-                                            time_params));
+                                   // timeTextview.setLayoutParams(new TableLayout.LayoutParams(
+                                         //   time_params));
                                     timeTextview.setText(timeStamp);
-                                    childLayout.addView(timeTextview);
+                                    TextView filenameTXTV=new TextView(DashboardActivity.this);
+                                   // filenameTXTV.setText(finalImagename);
+                                   // childLayout.addView(filenameTXTV);
                                     mylayout.addView(childLayout);
                                     String senderName = "";
                                     senderName = SenderId;
@@ -548,13 +555,17 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                                     manager.notify(0, builder.build());
                                 }
                                 if(finalImageMessage !=null){
-
+                                    linearParams.height=300;
+                                    linearParams.topMargin=5;
+                                    linearParams.width=300;
+                                    linearParams.leftMargin = 10;
+                                    linearParams.rightMargin=180;
                                     childLayout = new LinearLayout(DashboardActivity.this);
-                                    childLayout.setLayoutParams(linearParams);
+                                   // childLayout.setLayoutParams(linearParams);
                                     childLayout.setOrientation(LinearLayout.VERTICAL);
                                     NewImageView=new ImageView(DashboardActivity.this);
-                                    NewImageView.setLayoutParams(new TableLayout.LayoutParams(
-                                            comingmessageParams));
+                                    childLayout.setLayoutParams(new TableLayout.LayoutParams(
+                                            linearParams));
 //                                    NewImageView.setMaxHeight(70);
 //                                    NewImageView.setMaxWidth(60);
                                     InputStream imageStream = null;
@@ -576,6 +587,7 @@ public class DashboardActivity extends AppCompatActivity implements Serializable
                                     timeTextview.setLayoutParams(new TableLayout.LayoutParams(
                                             time_params));
                                     timeTextview.setText(timeStamp);
+                                    childLayout.setBackground(DashboardActivity.this.getDrawable(R.drawable.text_messages_shape));
                                     childLayout.addView(timeTextview);
                                     childLayout.addView(NewImageView);
                                     mylayout.addView(childLayout);

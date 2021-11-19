@@ -202,18 +202,38 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
                                         LinearLayout.LayoutParams.WRAP_CONTENT,
                                         LinearLayout.LayoutParams.WRAP_CONTENT);
-                                outgoing_msg_params.width = 200;
-                                outgoing_msg_params.height=
-                                        outgoing_msg_params.leftMargin = 180;
-                                outgoing_msg_params.topMargin = 5;
-                                outgoing_msg_params.rightMargin = 10;
+                               // outgoing_msg_params.width = 200;
+                                //outgoing_msg_params.height=
+                                        //outgoing_msg_params.leftMargin = 180;
+                               //outgoing_msg_params.topMargin = 5;
+                                //outgoing_msg_params.rightMargin = 10;
                                 NewImageView = new ImageView(getActivity());
                                 NewImageView.setLayoutParams(new TableLayout.LayoutParams(
                                         outgoing_msg_params));
                                 NewImageView.setPadding(5, 5, 5, 5);
                                 NewImageView.setForegroundGravity(Gravity.LEFT | Gravity.CENTER);
                                 NewImageView.setImageBitmap(selectedImage);
-                                mylayout.addView(NewImageView);
+                            LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.MATCH_PARENT);
+                            linearParams.height=300;
+                            linearParams.topMargin=5;
+                            linearParams.width=300;
+                            linearParams.leftMargin = 180;
+                            childLayout = new LinearLayout(getActivity());
+                            NewImageView.setLayoutParams(new TableLayout.LayoutParams(
+                                    outgoing_msg_params));
+                            String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(new Date());
+                            childLayout.setLayoutParams(linearParams);
+                            childLayout.setOrientation(LinearLayout.VERTICAL);
+                            childLayout.setBackground(getActivity().getDrawable(R.drawable.your_message_shape));
+                            childLayout.setPadding(5,5,5,50);
+
+                            TextView timeTextview = new TextView(getContext());
+                            timeTextview.setText(timeStamp);
+                            childLayout.addView(timeTextview);
+                            childLayout.addView(NewImageView);
+                            mylayout.addView(childLayout);
                             messageClass=new ImageMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),myfile.getName(),myfile, myImagebytes);
                             DashboardActivity.mConnectedThread.write(messageClass);
 
@@ -279,17 +299,46 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 LinearLayout.LayoutParams outgoing_msg_params = new LinearLayout.LayoutParams(
                                         LinearLayout.LayoutParams.WRAP_CONTENT,
                                         LinearLayout.LayoutParams.WRAP_CONTENT);
-                                outgoing_msg_params.width = 200;
-                                outgoing_msg_params.height=
-                                outgoing_msg_params.leftMargin = 180;
-                                outgoing_msg_params.topMargin = 5;
-                                outgoing_msg_params.rightMargin = 10;
+//                                outgoing_msg_params.width = 500;
+//                                outgoing_msg_params.height=500;
+
+                                outgoing_msg_params.topMargin = 1;
+                               // outgoing_msg_params.rightMargin = 10;
                                 NewImageView.setLayoutParams(new TableLayout.LayoutParams(
                                         outgoing_msg_params));
                                 NewImageView.setPadding(5, 5, 5, 5);
                                 NewImageView.setForegroundGravity(Gravity.LEFT | Gravity.CENTER);
                                 NewImageView.setImageBitmap(selectedImage);
-                                mylayout.addView(NewImageView);
+                            LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.MATCH_PARENT);
+                            linearParams.height=300;
+                            linearParams.topMargin=5;
+                            linearParams.width=300;
+                            linearParams.leftMargin = 180;
+                            childLayout = new LinearLayout(getActivity());
+                            NewImageView.setLayoutParams(new TableLayout.LayoutParams(
+                                    outgoing_msg_params));
+                            String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(new Date());
+                            childLayout.setLayoutParams(linearParams);
+                            childLayout.setOrientation(LinearLayout.VERTICAL);
+                            childLayout.setBackground(getActivity().getDrawable(R.drawable.your_message_shape));
+                           childLayout.setPadding(5,5,5,50);
+
+                            TextView timeTextview = new TextView(getContext());
+                            LinearLayout.LayoutParams time_params = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT);
+                            time_params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                            time_params.leftMargin = 200;
+                            time_params.topMargin = 0;
+                            time_params.bottomMargin = 5;
+                            time_params.rightMargin = 10;
+//                            timeTextview.setLayoutParams(new TableLayout.LayoutParams(
+                             //       time_params));
+                            timeTextview.setText(timeStamp);
+
+
                             int origWidth = selectedImage.getWidth();
                             int origHeight = selectedImage.getHeight();
                             int destHeight=origHeight;
@@ -312,6 +361,13 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 File f = new File(selectedPath);
                                 BitmapDataObject bitmapDataObject=new BitmapDataObject();
                                 bitmapDataObject.imageByteArray=imageToSend;
+                                TextView filenameTXTV=new TextView(getContext());
+                                filenameTXTV.setText(f.getName());
+                          // childLayout.addView(filenameTXTV);
+                            childLayout.addView(timeTextview);
+                            childLayout.addView(NewImageView);
+
+                            mylayout.addView(childLayout);
                                 messageClass=new ImageMessage(messageType,bluetoothAdapter.getName(),bluetoothDevice.getName(),f.getName(),f,imageToSend);
                                 DashboardActivity.mConnectedThread.write(messageClass);
 
