@@ -16,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.nfc.Tag;
 import android.os.Build;
@@ -34,6 +35,7 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.provider.MediaStore;
@@ -56,7 +58,9 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
+import android.widget.VideoView;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -82,6 +86,8 @@ import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.BreakIterator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -134,7 +140,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
    private MessageClass messageClass;
    private StringMessage stringMessage;
    private ImageMessage imageMessage;
-    String[] mimetypes = {DOC,DOCX,XLS,TEXT,PDF,VIDEO,AUDIO};
+
     ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
                 private ImageView NewImageView;
@@ -396,6 +402,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
     );
     ActivityResultLauncher<Intent> document_ActivityResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     if (result.getResultCode() == Activity.RESULT_OK) {
@@ -407,17 +414,111 @@ public class ActionPageFragment extends Fragment implements Serializable {
                         src = src.replaceAll(" ", "%20");
                         File source=new File(src);
                          String filename=uri.getLastPathSegment();
+
                         Log.d(TAG,"File choosen is "+src);
-                        Log.d(TAG,"The actual file name is "+source.getName());
-                        Intent intent=new Intent(Intent.ACTION_VIEW,uri);
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        startActivity(intent);
+                        Log.d(TAG,"The actual file name is "+filename);
+                        try {
+//                            byte[] mybytes=new byte[(int)(new File(uri.getPath()).length())];
+//                            BufferedInputStream buf=new BufferedInputStream(new FileInputStream(new File(uri.getPath())));
+//                            buf.read(mybytes,0,mybytes.length);
+//                            buf.close();
+                            InputStream iStream=getActivity().getContentResolver().openInputStream(uri);
+
+                            byte[] fileBytes= getBytes(iStream);
+                           // Log.d("bytes:",""+fileBytes);
+                            String mimeType=getActivity().getContentResolver().getType(uri);
+                            Log.d("Type: ",mimeType);
+                            if(mimeType.contains("video/")){
+                                LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.MATCH_PARENT);
+                                linearParams.height=300;
+                                linearParams.topMargin=5;
+                                linearParams.width=300;
+                                linearParams.leftMargin = 180;
+                                LinearLayout.LayoutParams videoparams = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.MATCH_PARENT);
+                                videoparams .height=200;
+                                videoparams.topMargin=1;
+                                videoparams.width=300;
+                                LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.MATCH_PARENT);
+                                btnparams .height=50;
+                                btnparams.topMargin=1;
+                                btnparams.width=100;
+
+
+                                Log.d("Found?","Video type");
+                                childLayout=new LinearLayout(getActivity());
+                                childLayout.setLayoutParams(linearParams);
+                                childLayout.setOrientation(LinearLayout.VERTICAL);
+                                childLayout.setPadding(5,5,5,50);
+                                childLayout.setBackground(getActivity().getDrawable(R.drawable.your_message_shape));
+                                VideoView view=new VideoView(getActivity());
+                                view.setVideoURI(uri);
+                                view.setLayoutParams(videoparams);
+                                childLayout.addView(view);
+
+                                Button btn=new Button(getActivity());
+                                btn.setLayoutParams(btnparams);
+
+                                //btn.setText("play");
+                                btn.setBackground(getActivity().getDrawable(R.drawable.play));
+                                childLayout.addView(btn);
+                                mylayout.addView(childLayout);
+                                 view.showContextMenu();
+                                btn.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if(!view.isPlaying()) {
+                                            view.start();
+                                            btn.setBackground(getActivity().getDrawable(R.drawable.pause));
+                                        }
+                                        else if(view.isPlaying()){
+                                            view.pause();
+                                            btn.setBackground(getActivity().getDrawable(R.drawable.play));
+
+                                        }
+                                        else{
+                                            btn.setBackground(getActivity().getDrawable(R.drawable.play));
+                                        }
+
+
+                                    }
+                                });
+
+                            }
+                            Toast.makeText(getContext(), "This is the type: "+mimeType, Toast.LENGTH_SHORT).show();
+                            messageClass=new DocumentFileMessage("document", bluetoothAdapter.getName(), bluetoothDevice.getName(),source.getName(), mimeType, source, fileBytes);
+                            DashboardActivity.mConnectedThread.write(messageClass);
+                          iStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        finally {
+
+                        }
+//                        Intent intent=new Intent(Intent.ACTION_VIEW,uri);
+//                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//                        startActivity(intent);
 
                     }
                 }
             }
 
     );
+    private byte[] getBytes(InputStream inputStream) throws IOException{
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+        int bufferSize=1024;
+        byte[] buffer=new byte[bufferSize];
+        int len=0;
+        while((len=inputStream.read(buffer))!=-1){
+            byteArrayOutputStream.write(buffer,0,len);
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
 
     private void copyFile(File source,File destination) throws IOException {
         FileChannel in=new FileInputStream(source).getChannel();
@@ -616,7 +717,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
     }
 
     public void openFile(){
-
+        String[] mimetypes = {DOC,DOCX,XLS,TEXT,PDF,VIDEO,AUDIO};
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
       // intent.addCategory(Intent.CATEGORY_OPENABLE);
        //intent.putExtra("CONTENT_TYPE","*/*");
@@ -631,7 +732,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
         String[] mimetypes = {IMAGE};
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         // intent.addCategory(Intent.CATEGORY_OPENABLE);
-        //intent.putExtra("CONTENT_TYPE","*/*");
+        intent.putExtra("CONTENT_TYPE","*/*");
         intent.setType("*/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
