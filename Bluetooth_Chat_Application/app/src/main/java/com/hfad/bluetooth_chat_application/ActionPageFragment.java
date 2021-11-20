@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.nfc.Tag;
 import android.os.Build;
@@ -53,6 +54,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.PopupWindow;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -437,57 +439,68 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 linearParams.width=300;
                                 linearParams.leftMargin = 180;
                                 LinearLayout.LayoutParams videoparams = new LinearLayout.LayoutParams(
-                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.MATCH_PARENT,
                                         LinearLayout.LayoutParams.MATCH_PARENT);
                                 videoparams .height=200;
                                 videoparams.topMargin=1;
-                                videoparams.width=300;
-                                LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(
-                                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                                        LinearLayout.LayoutParams.MATCH_PARENT);
-                                btnparams .height=50;
-                                btnparams.topMargin=1;
-                                btnparams.width=100;
+                                videoparams.width=600;
+//                                LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(
+//                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+//                                        LinearLayout.LayoutParams.MATCH_PARENT);
+//                                btnparams .height=50;
+//                                btnparams.topMargin=1;
+//                                btnparams.width=100;
 
 
-                                Log.d("Found?","Video type");
+                             //   Log.d("Found?","Video type");
                                 childLayout=new LinearLayout(getActivity());
                                 childLayout.setLayoutParams(linearParams);
                                 childLayout.setOrientation(LinearLayout.VERTICAL);
                                 childLayout.setPadding(5,5,5,50);
                                 childLayout.setBackground(getActivity().getDrawable(R.drawable.your_message_shape));
-                                VideoView view=new VideoView(getActivity());
-                                view.setVideoURI(uri);
-                                view.setLayoutParams(videoparams);
-                                childLayout.addView(view);
-
-                                Button btn=new Button(getActivity());
-                                btn.setLayoutParams(btnparams);
-
+                                VideoView Videoview=new VideoView(getActivity());
+                                Videoview.setVideoURI(uri);
+                               Videoview.setLayoutParams(videoparams);
+                                String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(new Date());
+                                TextView timeTextview = new TextView(getContext());
+                                timeTextview.setText(timeStamp);
+                                childLayout.addView(Videoview);
+                                childLayout.addView(timeTextview);
+                                MediaController mc=new MediaController(getActivity());
+                                Videoview.setMediaController(mc);
+//                                Button btn=new Button(getActivity());
+//                                btn.setLayoutParams(btnparams);
+                               Videoview.requestFocus();
+                               Videoview.seekTo(01);
                                 //btn.setText("play");
-                                btn.setBackground(getActivity().getDrawable(R.drawable.play));
-                                childLayout.addView(btn);
+//                                btn.setBackground(getActivity().getDrawable(R.drawable.play));
+//                                childLayout.addView(btn);
                                 mylayout.addView(childLayout);
-                                 view.showContextMenu();
-                                btn.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        if(!view.isPlaying()) {
-                                            view.start();
-                                            btn.setBackground(getActivity().getDrawable(R.drawable.pause));
-                                        }
-                                        else if(view.isPlaying()){
-                                            view.pause();
-                                            btn.setBackground(getActivity().getDrawable(R.drawable.play));
 
-                                        }
-                                        else{
-                                            btn.setBackground(getActivity().getDrawable(R.drawable.play));
-                                        }
+                                 Videoview.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                     @Override
+                                     public void onCompletion(MediaPlayer mp) {
+                                         //btn.setBackground(getActivity().getDrawable(R.drawable.play));
+//                                         mp.stop();
+                                         mp.seekTo(0);
 
-
-                                    }
-                                });
+                                     }
+                                 });
+//                                btn.setOnClickListener(new View.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(View v) {
+//                                        if (!view.isPlaying()) {
+//                                            btn.setBackground(getActivity().getDrawable(R.drawable.play));
+//                                            view.start();
+//                                            btn.setBackground(getActivity().getDrawable(R.drawable.pause));
+//                                        } else if (view.isPlaying()) {
+//                                            btn.setBackground(getActivity().getDrawable(R.drawable.pause));
+//                                            view.pause();
+//                                            btn.setBackground(getActivity().getDrawable(R.drawable.play));
+//
+//                                        }
+//                                    }
+                             //  });
 
                             }
                             Toast.makeText(getContext(), "This is the type: "+mimeType, Toast.LENGTH_SHORT).show();
