@@ -52,10 +52,12 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -438,12 +440,11 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 linearParams.topMargin=5;
                                 linearParams.width=300;
                                 linearParams.leftMargin = 180;
-                                LinearLayout.LayoutParams videoparams = new LinearLayout.LayoutParams(
-                                        LinearLayout.LayoutParams.MATCH_PARENT,
-                                        LinearLayout.LayoutParams.MATCH_PARENT);
-                                videoparams .height=200;
+                                RelativeLayout.LayoutParams videoparams = new RelativeLayout.LayoutParams(
+                                        300,200);
+                               // videoparams .height=200;
                                 videoparams.topMargin=1;
-                                videoparams.width=600;
+                               // videoparams.width=600;
 //                                LinearLayout.LayoutParams btnparams = new LinearLayout.LayoutParams(
 //                                        LinearLayout.LayoutParams.WRAP_CONTENT,
 //                                        LinearLayout.LayoutParams.MATCH_PARENT);
@@ -460,13 +461,14 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 childLayout.setBackground(getActivity().getDrawable(R.drawable.your_message_shape));
                                 VideoView Videoview=new VideoView(getActivity());
                                 Videoview.setVideoURI(uri);
-                               Videoview.setLayoutParams(videoparams);
+                               Videoview.setLayoutParams( new TableLayout.LayoutParams(videoparams));
                                 String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(new Date());
                                 TextView timeTextview = new TextView(getContext());
                                 timeTextview.setText(timeStamp);
                                 childLayout.addView(Videoview);
                                 childLayout.addView(timeTextview);
                                 MediaController mc=new MediaController(getActivity());
+                                mc.setAnchorView(Videoview);
                                 Videoview.setMediaController(mc);
 //                                Button btn=new Button(getActivity());
 //                                btn.setLayoutParams(btnparams);
