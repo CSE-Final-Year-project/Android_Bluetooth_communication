@@ -17,6 +17,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.nfc.Tag;
@@ -58,6 +59,7 @@ import android.widget.LinearLayout;
 import android.widget.MediaController;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -136,6 +138,10 @@ public class ActionPageFragment extends Fragment implements Serializable {
     ImageView documentImageview;
     ImageView cameraImageview;
     ImageView galleryImageView;
+    SeekBar audioSeek;
+    MediaPlayer mMediaPlayer;
+    TextView txtCurrentTime;
+    Handler seekHandler;
     Dashboard_ListFragment dashboardListFragment;
     private long userId;
     Bitmap mImageBitmap = null;
@@ -412,6 +418,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         // openFile();
 
+                        txtCurrentTime=new TextView(getActivity());
                         Intent data = result.getData();
                         Uri uri=data.getData();
                         String src=uri.getPath();
@@ -488,23 +495,102 @@ public class ActionPageFragment extends Fragment implements Serializable {
 
                                      }
                                  });
-//                                btn.setOnClickListener(new View.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(View v) {
-//                                        if (!view.isPlaying()) {
-//                                            btn.setBackground(getActivity().getDrawable(R.drawable.play));
-//                                            view.start();
-//                                            btn.setBackground(getActivity().getDrawable(R.drawable.pause));
-//                                        } else if (view.isPlaying()) {
-//                                            btn.setBackground(getActivity().getDrawable(R.drawable.pause));
-//                                            view.pause();
-//                                            btn.setBackground(getActivity().getDrawable(R.drawable.play));
-//
-//                                        }
-//                                    }
-                             //  });
+
 
                             }
+                            else if(mimeType.contains("audio/")){
+
+
+                                // MediaController mMediaController;
+                                mMediaPlayer = new MediaPlayer();
+                                Button audiobttn=new Button(getActivity());
+                                     audiobttn.setText("Play Audio");
+                                LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.MATCH_PARENT);
+                                linearParams.height=300;
+                                linearParams.topMargin=5;
+                                linearParams.width=300;
+                                linearParams.leftMargin = 180;
+                                LinearLayout Audioview=new LinearLayout(getActivity());
+                                audiobttn.setLayoutParams(new TableLayout.LayoutParams(200,100));
+                                Audioview.setBackground(getActivity().getDrawable(R.drawable.audio));
+                                Audioview.setLayoutParams(new TableLayout.LayoutParams(200,100));
+                                Handler mHandler = new Handler();
+                                // mMediaPlayer=;
+                                childLayout=new LinearLayout(getActivity());
+                                //mMediaController.setAnchorView(Audioview);
+                                childLayout.setOrientation(LinearLayout.VERTICAL);
+                                childLayout.setLayoutParams(linearParams);
+                                childLayout.setBackground(getActivity().getDrawable(R.drawable.your_message_shape));
+                                childLayout.addView(Audioview);
+                                audioSeek=new SeekBar(getActivity());
+                                childLayout.addView(audioSeek);
+                                childLayout.addView(audiobttn);
+                                mylayout.addView(childLayout);
+                                final boolean[][] isReleased = {{false}};
+                               // mMediaController=new MediaController(getActivity());
+                                try{
+
+                                   // mp.setDataSource(source.getPath());//Write your location here
+
+                                    mMediaPlayer.reset();
+                                    mMediaPlayer.setDataSource(getContext(),uri);//The location of my audio
+                                    mMediaPlayer.prepare();
+                                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                                    audioSeek.setMax(mMediaPlayer.getDuration());
+                                    //mMediaPlayer.start();
+                                    mMediaPlayer.seekTo(01);
+                                   // final MediaPlayer[] finalMMediaPlayer = {mMediaPlayer[0][0]};
+                                    final boolean[] finalIsReleased = {isReleased[0][0]};
+                                    audiobttn.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            if (mMediaPlayer != null && !finalIsReleased[0]) {
+
+                                                if (!mMediaPlayer.isPlaying()) {
+                                                    mMediaPlayer.start();
+                                                    updateSeekBar();
+                                                    audiobttn.setText("Pause");
+
+                                                } else if (mMediaPlayer.isPlaying()) {
+                                                    mMediaPlayer.pause();
+                                                    audiobttn.setText("Resume");
+                                                }
+
+                                            }
+                                        }
+                                    });
+                                    MediaPlayer finalMMediaPlayer1 = mMediaPlayer;
+                                    mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                        @Override
+                                        public void onCompletion(MediaPlayer mp) {
+                                            finalMMediaPlayer1.seekTo(0);
+                                            //mMediaPlayer.stop();
+                                          //  mMediaPlayer[0][0].stop();
+                                          //  mMediaPlayer[0][0].release();
+//                                            mMediaPlayer[0][0].reset();
+                                            mMediaPlayer=null;
+                                            isReleased[0][0] =true;
+                                            audiobttn.setText("PlayAudio");
+                                        }
+                                    });
+
+
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                finally {
+
+                                }
+
+
+
+                                //mylayout.addView(audiobttn);
+
+                            }
+
+
                             Toast.makeText(getContext(), "This is the type: "+mimeType, Toast.LENGTH_SHORT).show();
                             messageClass=new DocumentFileMessage("document", bluetoothAdapter.getName(), bluetoothDevice.getName(),source.getName(), mimeType, source, fileBytes);
                             DashboardActivity.mConnectedThread.write(messageClass);
@@ -513,17 +599,57 @@ public class ActionPageFragment extends Fragment implements Serializable {
                             e.printStackTrace();
                         }
                         finally {
-
+//                            mp.stop();
+//                            mp.release();
                         }
 //                        Intent intent=new Intent(Intent.ACTION_VIEW,uri);
 //                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 //                        startActivity(intent);
+
+
 
                     }
                 }
             }
 
     );
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            updateSeekBar();
+        }
+    };
+    private void updateSeekBar() {
+        seekHandler=new Handler();
+        audioSeek.setProgress(mMediaPlayer.getCurrentPosition());
+        txtCurrentTime.setText(milliSecondsToTimer(mMediaPlayer.getCurrentPosition()));
+        seekHandler.postDelayed(runnable, 50);
+    }
+    private String milliSecondsToTimer(long milliseconds) {
+        String finalTimerString = "";
+        String secondsString = "";
+
+        // Convert total duration into time
+        int hours = (int) (milliseconds / (1000 * 60 * 60));
+        int minutes = (int) (milliseconds % (1000 * 60 * 60)) / (1000 * 60);
+        int seconds = (int) ((milliseconds % (1000 * 60 * 60)) % (1000 * 60) / 1000);
+        // Add hours if there
+        if (hours > 0) {
+            finalTimerString = hours + ":";
+        }
+
+        // Prepending 0 to seconds if it is one digit
+        if (seconds < 10) {
+            secondsString = "0" + seconds;
+        } else {
+            secondsString = "" + seconds;
+        }
+
+        finalTimerString = finalTimerString + minutes + ":" + secondsString;
+
+        // return timer string
+        return finalTimerString;
+    }
     private byte[] getBytes(InputStream inputStream) throws IOException{
         ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
         int bufferSize=1024;
@@ -568,6 +694,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         Log.d(TAG,bluetoothAdapter.getName());
         if (savedInstanceState != null) {
             userId = savedInstanceState.getLong("userId");
@@ -900,10 +1027,7 @@ private String GetIdentifiedId(){
         image.compress(compressFormat,quality,byteArrayOutputStream);
         return byteArrayOutputStream.toByteArray();
     }
-    @Override
-    public void onStop() {
-        super.onStop();
 
-    }
+
 
 }
