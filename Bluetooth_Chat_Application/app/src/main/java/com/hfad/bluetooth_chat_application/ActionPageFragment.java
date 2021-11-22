@@ -513,11 +513,14 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 linearParams.width=300;
                                 linearParams.leftMargin = 180;
                                 LinearLayout Audioview=new LinearLayout(getActivity());
-                                audiobttn.setLayoutParams(new TableLayout.LayoutParams(200,100));
+                                audiobttn.setLayoutParams(new TableLayout.LayoutParams(100,70));
                                 Audioview.setBackground(getActivity().getDrawable(R.drawable.audio));
-                                Audioview.setLayoutParams(new TableLayout.LayoutParams(200,100));
+                                Audioview.setLayoutParams(new TableLayout.LayoutParams(150,80));
                                 Handler mHandler = new Handler();
                                 // mMediaPlayer=;
+                                String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(new Date());
+                                TextView timeTextview = new TextView(getContext());
+                                timeTextview.setText(timeStamp);
                                 childLayout=new LinearLayout(getActivity());
                                 //mMediaController.setAnchorView(Audioview);
                                 childLayout.setOrientation(LinearLayout.VERTICAL);
@@ -526,7 +529,10 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 childLayout.addView(Audioview);
                                 audioSeek=new SeekBar(getActivity());
                                 childLayout.addView(audioSeek);
+                                childLayout.addView(txtCurrentTime);
                                 childLayout.addView(audiobttn);
+                                childLayout.addView(timeTextview);
+                                childLayout.setPadding(5,5,5,60);
                                 mylayout.addView(childLayout);
                                 final boolean[][] isReleased = {{false}};
                                // mMediaController=new MediaController(getActivity());
@@ -616,6 +622,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
+            if(mMediaPlayer!=null)
             updateSeekBar();
         }
     };
@@ -802,10 +809,11 @@ public class ActionPageFragment extends Fragment implements Serializable {
         }
 
 //    @Override
-//    public void onDestroy() {
-//        super.onDestroy();
+  public void onDestroy() {
+       super.onDestroy();
+       mMediaPlayer.release();
 //        softInputAssist.onDestroy();
-//    }
+   }
     private String getDeviceUUID(){
         String myUuid="";
         String TotalUuid="";
