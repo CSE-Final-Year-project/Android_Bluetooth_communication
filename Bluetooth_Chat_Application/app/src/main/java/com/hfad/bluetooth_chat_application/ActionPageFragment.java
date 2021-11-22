@@ -140,6 +140,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
     ImageView galleryImageView;
     SeekBar audioSeek;
     MediaPlayer mMediaPlayer;
+    boolean isReleased;
     TextView txtCurrentTime;
     Handler seekHandler;
     Dashboard_ListFragment dashboardListFragment;
@@ -534,7 +535,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 childLayout.addView(timeTextview);
                                 childLayout.setPadding(5,5,5,60);
                                 mylayout.addView(childLayout);
-                                final boolean[][] isReleased = {{false}};
+                                 isReleased = false;
                                // mMediaController=new MediaController(getActivity());
                                 try{
 
@@ -548,11 +549,11 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                     //mMediaPlayer.start();
                                     mMediaPlayer.seekTo(01);
                                    // final MediaPlayer[] finalMMediaPlayer = {mMediaPlayer[0][0]};
-                                    final boolean[] finalIsReleased = {isReleased[0][0]};
+
                                     audiobttn.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
-                                            if (mMediaPlayer != null && !finalIsReleased[0]) {
+                                            if (mMediaPlayer != null && !isReleased) {
 
                                                 if (!mMediaPlayer.isPlaying()) {
                                                     mMediaPlayer.start();
@@ -572,17 +573,40 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                         @Override
                                         public void onCompletion(MediaPlayer mp) {
                                             finalMMediaPlayer1.seekTo(0);
+                                            updateSeekBar();
                                             //mMediaPlayer.stop();
                                           //  mMediaPlayer[0][0].stop();
                                           //  mMediaPlayer[0][0].release();
 //                                            mMediaPlayer[0][0].reset();
-                                            mMediaPlayer=null;
-                                            isReleased[0][0] =true;
+
+//                                            mMediaPlayer=null;
+//                                            isReleased[0][0] =true;
                                             audiobttn.setText("PlayAudio");
+
+
                                         }
                                     });
 
+                                 audioSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                                     @Override
+                                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                         if(mMediaPlayer!=null && fromUser) {
+                                             milliSecondsToTimer((long) progress);
+                                             updateSeekBar();
+                                             mMediaPlayer.seekTo(progress);
+                                         }
+                                     }
 
+                                     @Override
+                                     public void onStartTrackingTouch(SeekBar seekBar) {
+
+                                     }
+
+                                     @Override
+                                     public void onStopTrackingTouch(SeekBar seekBar) {
+
+                                     }
+                                 });
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
@@ -812,6 +836,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
   public void onDestroy() {
        super.onDestroy();
        mMediaPlayer.release();
+       isReleased=true;
 //        softInputAssist.onDestroy();
    }
     private String getDeviceUUID(){
