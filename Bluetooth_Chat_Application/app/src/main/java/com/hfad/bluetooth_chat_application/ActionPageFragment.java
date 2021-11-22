@@ -505,7 +505,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
                                 // MediaController mMediaController;
                                 mMediaPlayer = new MediaPlayer();
                                 Button audiobttn=new Button(getActivity());
-                                     audiobttn.setText("Play Audio");
+                                     audiobttn.setText("Play");
                                 LinearLayout.LayoutParams linearParams = new LinearLayout.LayoutParams(
                                         LinearLayout.LayoutParams.WRAP_CONTENT,
                                         LinearLayout.LayoutParams.MATCH_PARENT);
@@ -581,7 +581,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
 
 //                                            mMediaPlayer=null;
 //                                            isReleased[0][0] =true;
-                                            audiobttn.setText("PlayAudio");
+                                            audiobttn.setText("Play");
 
 
                                         }
@@ -646,7 +646,7 @@ public class ActionPageFragment extends Fragment implements Serializable {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            if(mMediaPlayer!=null)
+            if(mMediaPlayer!=null&& !isReleased && !isDetached())
             updateSeekBar();
         }
     };
@@ -835,8 +835,13 @@ public class ActionPageFragment extends Fragment implements Serializable {
 //    @Override
   public void onDestroy() {
        super.onDestroy();
-       mMediaPlayer.release();
-       isReleased=true;
+       if(mMediaPlayer!=null) {
+           if(seekHandler!=null && runnable!=null)
+           seekHandler.removeCallbacksAndMessages(runnable);
+           mMediaPlayer.release();
+           isReleased = true;
+
+       }
 //        softInputAssist.onDestroy();
    }
     private String getDeviceUUID(){
