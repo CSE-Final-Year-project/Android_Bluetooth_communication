@@ -1,0 +1,44 @@
+<androidx.appcompat.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@color/toolbar"
+    android:layout_marginLeft="0dp"
+    android:layout_marginRight="0dp"
+    android:layout_marginTop="0dp"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" >
+    <Switch
+        android:id="@+id/bluetooth_enabling"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="10dp"
+        android:background="@color/bluetoothbutton"
+        android:minHeight="48dp"
+        android:paddingLeft="10dp"
+        android:showText="true"
+        android:text="Turn"
+        android:textColor="@color/black"
+        android:textOff="Off"
+        android:textOn="On"
+        android:checked="true"
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <Button
+        android:id="@+id/scan"
+        android:layout_width="125dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:layout_marginTop="13dp"
+        android:layout_marginRight="10dp"
+        android:drawableLeft="@drawable/bluetooth_icon"
+        android:minHeight="48dp"
+        android:text="Scan"
+        android:textColor="@color/white"
+        android:textSize="15dp"
+        tools:ignore="TouchTargetSizeCheck" />
+    />
+
+</androidx.appcompat.widget.Toolbar>

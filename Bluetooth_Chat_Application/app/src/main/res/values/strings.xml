@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Easy_Chat</string>
+    <string name="dialog_text">Loading paired devices</string>
+    <string name="dialog_title">Discovering.........</string>
+    <string name="Turn_Bluetooth">Turn</string>
+    <string name="settings">settings</string>
+    <string name="call">call</string>
+    <string name="chanel_name">messagesnotification</string>
+    <string name="chanel_description">Easy_chat notification</string>
+
+</resources>

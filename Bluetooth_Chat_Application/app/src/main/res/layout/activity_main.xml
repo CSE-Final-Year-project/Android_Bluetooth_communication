@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:layout_centerInParent="true"
+    android:background="@color/background"
+    android:id="@+id/main"
+    tools:context=".MainActivity" >
+        <include
+
+                layout="@layout/toolbar_main"
+                android:id="@+id/toolbar"
+                />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_margin="20dp"
+            android:padding="@dimen/speech_bubble_corners"
+            android:background="@drawable/shape"
+
+            android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/initialsetup"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginRight="40dp"
+                    android:layout_marginBottom="50sp"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Initial Setup"
+                    android:textColor="@color/black"
+                    android:textSize="32sp" />
+
+
+                <TextView
+                    android:id="@+id/divicename"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="40dp"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Device name"
+                    android:textColor="@color/black"
+
+                    android:textSize="25sp" />
+
+                <TextView
+
+                    android:id="@+id/devname"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="40dp"
+                    android:background="#FFFAFA"
+                    android:textColor="@color/black" />
+
+                <Button
+                    android:id="@+id/gobtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginRight="40dp"
+                    android:layout_weight="0"
+                    android:background="@drawable/roundedbutton"
+                    android:padding="6dp"
+                    android:text="Go ......" />
+
+
+        </LinearLayout>
+
+</LinearLayout>

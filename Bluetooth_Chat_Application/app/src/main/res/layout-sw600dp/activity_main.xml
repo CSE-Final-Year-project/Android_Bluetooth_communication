@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:layout_centerInParent="true"
+    android:background="@color/background"
+
+    tools:context=".MainActivity" >
+        <include
+
+                layout="@layout/toolbar_main"
+                android:id="@+id/toolbar"
+                />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_margin="20dp"
+            android:orientation="vertical"
+
+            android:background="@drawable/shape">
+
+                <TextView
+                    android:id="@+id/initialsetup"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginStart="90dp"
+                    android:layout_marginBottom="50sp"
+                    android:textColor="@color/black"
+                    android:textSize="32sp"
+                    android:fontFamily="sans-serif-black"
+                    android:text="Initial Setup" />
+                <TextView
+                    android:id="@+id/usertextview"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginStart="90dp"
+                    android:textColor="@color/black"
+                    android:textSize="25sp"
+                    android:fontFamily="sans-serif-black"
+
+                    android:text="your username" />
+                <EditText
+
+                        android:textColor="@color/black"
+                        android:background="#FFFAFA"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:hint="Enter the username"
+                    android:inputType="text"
+                    android:layout_marginStart="90dp"/>
+                <TextView
+                    android:id="@+id/divicename"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginStart="90dp"
+                    android:textColor="@color/black"
+                    android:textSize="25sp"
+                    android:fontFamily="sans-serif-black"
+
+                    android:text="Device name" />
+                <TextView
+                    android:id="@+id/devname"
+                    android:textColor="@color/black"
+                    android:background="#FFFAFA"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginStart="90dp"/>
+                <Button
+
+                    android:layout_width="160dp"
+                    android:layout_height="wrap_content"
+                    android:text="Go ......"
+                    android:background="@drawable/roundedbutton"
+                    android:padding="6dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_gravity="center"
+                    android:layout_weight="0"
+                    />
+
+
+
+
+
+        </LinearLayout>
+
+</LinearLayout>
